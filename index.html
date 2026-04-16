@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自律升级打卡器 RPG</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -289,6 +291,73 @@
             max-width: 500px;
             animation: rewardPop 0.5s ease;
         }
+
+        /* 同步弹窗 */
+        .sync-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 10002;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .sync-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 520px;
+            width: 100%;
+            border: 2px solid #3498db;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .sync-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .sync-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .sync-tab.active { background: #3498db; color: white; font-weight: bold; }
+        .sync-panel { display: none; }
+        .sync-panel.active { display: block; }
+        .qr-wrap {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .sync-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.85em;
+            resize: vertical;
+        }
+        .sync-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .sync-actions .btn { flex: 1; min-width: 120px; }
+        #reader {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            background: #000;
+        }
         @keyframes rewardPop {
             0% { transform: scale(0); }
             80% { transform: scale(1.1); }
@@ -359,6 +428,14 @@
             .reward-content { padding: 30px 20px; max-width: 95%; }
             .reward-title { font-size: 1.6em; }
             .reward-text { font-size: 1.1em; }
+
+            .sync-content { padding: 20px; max-width: 100%; }
+            .sync-tabs { flex-direction: column; }
+            .sync-tab { width: 100%; }
+            .qr-wrap { padding: 10px; }
+            #qrcode img, #qrcode canvas { width: 160px !important; height: 160px !important; }
+            .sync-actions { flex-direction: column; }
+            .sync-actions .btn { width: 100%; }
         }
 
         @media (max-width: 480px) {
@@ -545,6 +622,12 @@
             <button class="btn btn-warning" onclick="showReflection()">📝 手动反思总结</button>
             <p style="color:#aaa;font-size:0.85em;margin-top:10px;">系统也会每 4 小时自动提醒你反思一次</p>
         </div>
+
+        <!-- 数据同步 -->
+        <div class="section" style="text-align:center;">
+            <button class="btn btn-primary" onclick="openSyncModal()">🔄 数据同步</button>
+            <p style="color:#aaa;font-size:0.85em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
+        </div>
     </div>
 
     <!-- 燃向激励覆盖层 -->
@@ -605,6 +688,46 @@
             <div class="reward-title">🎉 奖励解锁！</div>
             <div class="reward-text" id="rewardText"></div>
             <button class="btn btn-primary" onclick="closeReward()">收下奖励 🎁</button>
+        </div>
+    </div>
+
+    <!-- 数据同步弹窗 -->
+    <div class="sync-modal" id="syncModal">
+        <div class="sync-content">
+            <div class="section-title" style="border-bottom-color:#3498db;margin-bottom:20px;">
+                <span>🔄 数据同步</span>
+                <button class="btn btn-small" onclick="closeSyncModal()" style="background:rgba(255,255,255,0.1);color:#fff;">关闭</button>
+            </div>
+            <div class="sync-tabs">
+                <button class="sync-tab active" data-tab="export" onclick="switchSyncTab('export', this)">📤 导出数据</button>
+                <button class="sync-tab" data-tab="import" onclick="switchSyncTab('import', this)">📥 导入数据</button>
+            </div>
+
+            <div class="sync-panel active" id="syncExportPanel">
+                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">用另一台设备的微信/浏览器扫码，或在下方复制 JSON 文本粘贴导入。</p>
+                <div style="text-align:center;">
+                    <div class="qr-wrap" id="qrcode"></div>
+                </div>
+                <textarea class="sync-textarea" id="exportJson" readonly></textarea>
+                <div class="sync-actions">
+                    <button class="btn btn-success" onclick="copyExportJson()">📋 复制 JSON</button>
+                    <button class="btn btn-primary" onclick="downloadJson()">💾 下载文件</button>
+                </div>
+            </div>
+
+            <div class="sync-panel" id="syncImportPanel">
+                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">粘贴 JSON 文本导入，或点击下方按钮扫码。</p>
+                <textarea class="sync-textarea" id="importJson" placeholder="将导出的 JSON 文本粘贴到这里..."></textarea>
+                <div class="sync-actions">
+                    <button class="btn btn-success" onclick="importFromText()">📋 导入文本</button>
+                    <button class="btn btn-primary" onclick="startQrScan()">📷 扫码导入</button>
+                </div>
+                <div id="reader" style="display:none;"></div>
+                <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="handleFileImport(this)">
+                <div class="sync-actions" style="margin-top:10px;">
+                    <button class="btn btn-warning" onclick="document.getElementById('jsonFileInput').click()">📁 从文件导入</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -965,6 +1088,138 @@
 
         function closeReward() {
             document.getElementById('rewardModal').style.display = 'none';
+        }
+
+        // ========== 数据同步 ==========
+        let html5QrCode = null;
+
+        function openSyncModal() {
+            document.getElementById('syncModal').style.display = 'flex';
+            switchSyncTab('export');
+            generateExport();
+        }
+
+        function closeSyncModal() {
+            document.getElementById('syncModal').style.display = 'none';
+            stopQrScan();
+        }
+
+        function switchSyncTab(tab, btn) {
+            document.querySelectorAll('.sync-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sync-panel').forEach(el => el.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            else document.querySelector('.sync-tab[data-tab="' + tab + '"]').classList.add('active');
+            document.getElementById('sync' + (tab === 'export' ? 'Export' : 'Import') + 'Panel').classList.add('active');
+            if (tab === 'export') generateExport();
+            if (tab === 'import') stopQrScan();
+        }
+
+        function generateExport() {
+            const json = JSON.stringify(data);
+            document.getElementById('exportJson').value = json;
+            const qrWrap = document.getElementById('qrcode');
+            qrWrap.innerHTML = '';
+            try {
+                new QRCode(qrWrap, {
+                    text: json,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            } catch (e) {
+                qrWrap.innerHTML = '<p style="color:#e74c3c;">二维码生成失败，请用 JSON 文本方式</p>';
+            }
+        }
+
+        function copyExportJson() {
+            const el = document.getElementById('exportJson');
+            el.select();
+            document.execCommand('copy');
+            alert('JSON 已复制到剪贴板');
+        }
+
+        function downloadJson() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'habit-tracker-backup-' + getTodayStr() + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importFromText() {
+            const text = document.getElementById('importJson').value.trim();
+            if (!text) return alert('请输入 JSON 文本');
+            applyImport(text);
+        }
+
+        function handleFileImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => applyImport(e.target.result);
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function applyImport(text) {
+            try {
+                const imported = JSON.parse(text);
+                if (!imported.habits || !Array.isArray(imported.habits)) {
+                    throw new Error('数据格式不正确');
+                }
+                if (!confirm('导入将覆盖当前设备上的所有数据，确定继续吗？')) return;
+                data = imported;
+                // 兼容旧数据
+                if (!data.motivationVideos) data.motivationVideos = [];
+                if (!data.rewardsUnlocked) data.rewardsUnlocked = [];
+                saveData();
+                renderAll();
+                updateCharts();
+                alert('导入成功！');
+                closeSyncModal();
+            } catch (err) {
+                alert('导入失败：' + err.message);
+            }
+        }
+
+        function startQrScan() {
+            const reader = document.getElementById('reader');
+            reader.style.display = 'block';
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode('reader');
+            }
+            html5QrCode.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                decodedText => {
+                    html5QrCode.stop().then(() => {
+                        reader.style.display = 'none';
+                        document.getElementById('importJson').value = decodedText;
+                        applyImport(decodedText);
+                    });
+                },
+                errorMessage => {}
+            ).catch(err => {
+                alert('无法启动摄像头：' + err);
+                reader.style.display = 'none';
+            });
+        }
+
+        function stopQrScan() {
+            const reader = document.getElementById('reader');
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    reader.style.display = 'none';
+                }).catch(() => {
+                    reader.style.display = 'none';
+                });
+            } else {
+                reader.style.display = 'none';
+            }
         }
 
         // ========== 主动激励系统 ==========
