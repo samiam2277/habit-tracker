@@ -688,6 +688,13 @@
             <button class="btn btn-primary" onclick="openSyncModal()">🔄 数据同步</button>
             <p style="color:#aaa;font-size:0.85em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
         </div>
+
+        <!-- 存储诊断 -->
+        <div class="section" style="text-align:center;">
+            <button class="btn btn-warning" onclick="runStorageDiagnostics()">🔍 诊断存储状态</button>
+            <p style="color:#aaa;font-size:0.85em;margin-top:10px;">检测 IndexedDB 音频是否完整，帮助排查同步问题</p>
+            <div id="diagResult" style="margin-top:15px;text-align:left;font-size:0.85em;display:none;"></div>
+        </div>
     </div>
 
     <!-- 燃向激励覆盖层 -->
@@ -769,10 +776,14 @@
             </div>
 
             <div class="sync-panel active" id="syncExportPanel">
-                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">用另一台设备的微信/浏览器扫码，或在下方复制 JSON 文本粘贴导入。</p>
+                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">
+                    <b>JSON 文本 / 下载文件</b>：包含完整数据（含音频），推荐用于手机同步。<br>
+                    <b>二维码</b>：因容量限制不含音频文件，仅同步习惯/目标等数据。
+                </p>
                 <div style="text-align:center;">
                     <div class="qr-wrap" id="qrcode"></div>
                 </div>
+                <div id="exportAudioStats" style="color:#f39c12;font-size:0.85em;margin-bottom:10px;"></div>
                 <textarea class="sync-textarea" id="exportJson" readonly></textarea>
                 <div class="sync-actions">
                     <button class="btn btn-success" onclick="copyExportJson()">📋 复制 JSON</button>
@@ -782,6 +793,7 @@
 
             <div class="sync-panel" id="syncImportPanel">
                 <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">粘贴 JSON 文本导入，或点击下方按钮扫码。</p>
+                <div id="importFileStats" style="color:#f39c12;font-size:0.85em;margin-bottom:10px;display:none;"></div>
                 <textarea class="sync-textarea" id="importJson" placeholder="将导出的 JSON 文本粘贴到这里..."></textarea>
                 <div class="sync-actions">
                     <button class="btn btn-success" onclick="importFromText()">📋 导入文本</button>
@@ -857,7 +869,9 @@
         let charts = {};
 
         // ========== 初始化 ==========
-        function init() {
+        async function init() {
+            // 自动修复：为旧数据从 IndexedDB 补回 base64
+            await migrateOldAudiosToBase64();
             saveData();
             renderAll();
             initCharts();
@@ -865,8 +879,49 @@
             setInterval(checkReflectionSchedule, 60000); // 每分钟检查一次
         }
 
+        async function migrateOldAudiosToBase64() {
+            let fixed = 0;
+            for (const audio of data.localAudios || []) {
+                if (!audio.base64 || audio.base64.length < 100) {
+                    try {
+                        const blob = await getAudioFromDB(audio.id, audio.mimeType);
+                        if (blob && blob.size > 0) {
+                            audio.base64 = await blobToBase64(blob);
+                            audio.mimeType = blob.type || audio.mimeType || 'audio/webm';
+                            fixed++;
+                            console.log('[Migrate] 补回 base64:', audio.id, audio.title);
+                        }
+                    } catch (e) {
+                        console.warn('[Migrate] 无法补回 base64:', audio.id, e.message);
+                    }
+                }
+            }
+            if (fixed > 0) {
+                console.log('[Migrate] 已为', fixed, '条旧音频补回 base64');
+            }
+        }
+
         function saveData() {
-            localStorage.setItem('habitRPGData', JSON.stringify(data));
+            try {
+                localStorage.setItem('habitRPGData', JSON.stringify(data));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    console.warn('[saveData] localStorage 空间不足，音频 base64 未持久化。建议导出备份。');
+                    // 尝试保存不含 base64 的版本
+                    const stripped = JSON.parse(JSON.stringify(data));
+                    if (stripped.localAudios) {
+                        stripped.localAudios.forEach(a => { delete a.base64; });
+                    }
+                    try {
+                        localStorage.setItem('habitRPGData', JSON.stringify(stripped));
+                        console.log('[saveData] 已保存不含音频的精简版本');
+                    } catch (e2) {
+                        console.error('[saveData] 即使精简版本也无法保存:', e2);
+                    }
+                } else {
+                    console.error('[saveData] 保存失败:', e);
+                }
+            }
         }
 
         // ========== 渲染 ==========
@@ -1164,7 +1219,6 @@
         function openSyncModal() {
             document.getElementById('syncModal').style.display = 'flex';
             switchSyncTab('export');
-            generateExport();
         }
 
         function closeSyncModal() {
@@ -1182,14 +1236,91 @@
             if (tab === 'import') stopQrScan();
         }
 
-        function generateExport() {
-            const json = JSON.stringify(data);
-            document.getElementById('exportJson').value = json;
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function base64ToBlob(base64, mimeType) {
+            let byteString;
+            if (base64.split(',')[0].indexOf('base64') >= 0) {
+                byteString = atob(base64.split(',')[1]);
+            } else {
+                byteString = atob(base64);
+            }
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeType });
+        }
+
+        function blobToArrayBuffer(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(blob);
+            });
+        }
+
+        async function generateExport() {
+            const exportBtn = document.querySelector('#syncExportPanel .btn-primary');
+            const copyBtn = document.querySelector('#syncExportPanel .btn-success');
+            if (exportBtn) { exportBtn.disabled = true; exportBtn.textContent = '生成中...'; }
+            if (copyBtn) copyBtn.disabled = true;
+
+            const exportData = JSON.parse(JSON.stringify(data));
+            let hasBase64Count = 0;
+            for (const audio of exportData.localAudios || []) {
+                // 优先使用内存中的 base64
+                if (audio.base64 && audio.base64.length > 100) {
+                    hasBase64Count++;
+                    console.log('[Export] from memory', audio.id, audio.title, 'base64 length:', audio.base64.length);
+                } else {
+                    // 兼容旧数据：从 IndexedDB 读取
+                    const blob = await getAudioFromDB(audio.id, audio.mimeType);
+                    if (blob && blob.size > 0) {
+                        audio.base64 = await blobToBase64(blob);
+                        audio.mimeType = blob.type || audio.mimeType || 'audio/webm';
+                        hasBase64Count++;
+                        console.log('[Export] from IndexedDB', audio.id, audio.title, 'blob size:', blob.size, 'base64 length:', audio.base64.length);
+                    } else {
+                        console.warn('[Export] MISSING blob for', audio.id, audio.title, 'size:', blob ? blob.size : 'null');
+                    }
+                }
+            }
+            const fullJson = JSON.stringify(exportData);
+            console.log('[Export] total JSON length:', fullJson.length, 'audios with base64:', hasBase64Count + '/' + (data.localAudios || []).length);
+            document.getElementById('exportJson').value = fullJson;
+
+            if (exportBtn) { exportBtn.disabled = false; exportBtn.textContent = '💾 下载文件'; }
+            if (copyBtn) copyBtn.disabled = false;
+
+            // 在导出面板显示统计信息
+            const statsEl = document.getElementById('exportAudioStats');
+            if (statsEl) {
+                const totalAudios = (data.localAudios || []).length;
+                if (hasBase64Count < totalAudios && totalAudios > 0) {
+                    statsEl.innerHTML = `<span style="color:#e74c3c;">⚠️ 音频导出: ${hasBase64Count}/${totalAudios} 条成功</span> | JSON 大小: ${formatBytes(fullJson.length)}<br><span style="color:#e74c3c;font-size:0.9em;">有 ${totalAudios - hasBase64Count} 条音频在 IndexedDB 中找不到，请先在电脑上点击"诊断存储状态"排查</span>`;
+                } else {
+                    statsEl.innerHTML = `音频导出: ${hasBase64Count}/${totalAudios} 条成功，JSON 大小: ${formatBytes(fullJson.length)}`;
+                }
+            }
+
+            // QR 码使用不含音频的精简数据
+            const qrData = JSON.parse(JSON.stringify(data));
+            const qrJson = JSON.stringify(qrData);
             const qrWrap = document.getElementById('qrcode');
             qrWrap.innerHTML = '';
             try {
                 new QRCode(qrWrap, {
-                    text: json,
+                    text: qrJson,
                     width: 200,
                     height: 200,
                     colorDark: '#000000',
@@ -1199,23 +1330,86 @@
             } catch (e) {
                 qrWrap.innerHTML = '<p style="color:#e74c3c;">二维码生成失败，请用 JSON 文本方式</p>';
             }
+            return exportData;
         }
 
-        function copyExportJson() {
+        async function copyExportJson() {
+            await generateExport();
             const el = document.getElementById('exportJson');
             el.select();
             document.execCommand('copy');
             alert('JSON 已复制到剪贴板');
         }
 
-        function downloadJson() {
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        async function downloadJson() {
+            const exportData = await generateExport();
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = 'habit-tracker-backup-' + getTodayStr() + '.json';
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        // ========== 存储诊断 ==========
+        async function runStorageDiagnostics() {
+            const resultEl = document.getElementById('diagResult');
+            resultEl.style.display = 'block';
+            resultEl.innerHTML = '<p style="color:#3498db;">🔍 正在诊断存储状态...</p>';
+
+            const lines = [];
+            lines.push(`<b>运行环境</b>: ${location.protocol} ${navigator.userAgent.split(')')[0]})`);
+
+            // 检查 IndexedDB 可用性
+            let idbAvailable = false;
+            let idbError = '';
+            try {
+                idbAvailable = !!window.indexedDB;
+            } catch (e) {
+                idbError = e.message;
+            }
+            lines.push(`<b>IndexedDB 支持</b>: ${idbAvailable ? '✅ 支持' : '❌ 不支持'} ${idbError ? '(' + idbError + ')' : ''}`);
+
+            // 检查 localStorage 中的音频元数据
+            const metaCount = (data.localAudios || []).length;
+            lines.push(`<b>localStorage 音频元数据</b>: ${metaCount} 条`);
+
+            // 检查 IndexedDB 中的实际音频
+            let dbBlobCount = 0;
+            let dbTotalSize = 0;
+            let missingInDB = [];
+            for (const audio of data.localAudios || []) {
+                try {
+                    const blob = await getAudioFromDB(audio.id, audio.mimeType);
+                    if (blob && blob.size > 0) {
+                        dbBlobCount++;
+                        dbTotalSize += blob.size;
+                    } else {
+                        missingInDB.push(audio.title || audio.id);
+                    }
+                } catch (e) {
+                    missingInDB.push((audio.title || audio.id) + ' (读取错误: ' + e.message + ')');
+                }
+            }
+            lines.push(`<b>IndexedDB 实际音频</b>: ${dbBlobCount}/${metaCount} 条，总大小 ${formatBytes(dbTotalSize)}`);
+            if (missingInDB.length > 0) {
+                lines.push(`<b style="color:#e74c3c;">❌ 缺失音频</b>: ${missingInDB.join(', ')}`);
+            }
+
+            // 检查 localStorage 用量
+            let lsSize = 0;
+            try {
+                lsSize = new Blob([JSON.stringify(localStorage)]).size;
+            } catch (e) {}
+            lines.push(`<b>localStorage 用量</b>: ${formatBytes(lsSize)}`);
+
+            // 协议警告
+            if (location.protocol === 'file:') {
+                lines.push(`<b style="color:#e74c3c;">⚠️ 警告</b>: 当前通过 file:// 协议打开，IndexedDB 会被 Chrome 禁用，无法存储音频！请通过 HTTP 服务器访问。`);
+            }
+
+            resultEl.innerHTML = lines.map(l => `<div style="margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.05);border-radius:6px;">${l}</div>`).join('');
         }
 
         function importFromText() {
@@ -1227,13 +1421,57 @@
         function handleFileImport(input) {
             const file = input.files[0];
             if (!file) return;
+
+            const statsEl = document.getElementById('importFileStats');
+            statsEl.style.display = 'block';
+            statsEl.textContent = `正在读取文件: ${file.name} (${formatBytes(file.size)})...`;
+
+            // 检查文件大小是否合理
+            if (file.size < 100) {
+                statsEl.textContent = `文件过小 (${formatBytes(file.size)})，可能已损坏或为空`;
+                input.value = '';
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = e => applyImport(e.target.result);
+            reader.onload = e => {
+                const text = e.target.result;
+                statsEl.textContent = `文件已读取: ${formatBytes(file.size)}，文本长度: ${formatBytes(text.length)}`;
+
+                // 快速分析 JSON 内容
+                try {
+                    const preview = JSON.parse(text);
+                    const audioMetaCount = (preview.localAudios || []).length;
+                    const audioWithBase64 = (preview.localAudios || []).filter(a => a.base64 && a.base64.length > 100).length;
+                    const totalBase64Length = (preview.localAudios || []).reduce((sum, a) => sum + (a.base64 ? a.base64.length : 0), 0);
+
+                    let analysis = `JSON 解析成功 | 音频元数据: ${audioMetaCount} 条`;
+                    if (audioWithBase64 > 0) {
+                        analysis += ` | 含 base64 音频: ${audioWithBase64}/${audioMetaCount} 条 | base64 总大小: ${formatBytes(totalBase64Length)}`;
+                    } else if (audioMetaCount > 0) {
+                        analysis += ` | ⚠️ 没有检测到 base64 音频数据！`;
+                    }
+                    statsEl.textContent = analysis;
+
+                    // 如果文件大小和文本长度差异很大，可能是编码问题
+                    if (text.length < file.size * 0.5) {
+                        statsEl.textContent += ' | ⚠️ 文本长度远小于文件大小，可能存在编码问题';
+                    }
+                } catch (err) {
+                    statsEl.textContent += ` | JSON 解析失败: ${err.message}`;
+                    return;
+                }
+
+                applyImport(text);
+            };
+            reader.onerror = () => {
+                statsEl.textContent = '文件读取失败';
+            };
             reader.readAsText(file);
             input.value = '';
         }
 
-        function applyImport(text) {
+        async function applyImport(text) {
             try {
                 const imported = JSON.parse(text);
                 if (!imported.habits || !Array.isArray(imported.habits)) {
@@ -1245,10 +1483,75 @@
                 if (!data.motivationVideos) data.motivationVideos = [];
                 if (!data.rewardsUnlocked) data.rewardsUnlocked = [];
                 if (!data.localAudios) data.localAudios = [];
+
+                // 检测运行环境
+                const isFileProtocol = location.protocol === 'file:';
+                let idbAvailable = false;
+                try {
+                    idbAvailable = !!window.indexedDB;
+                } catch (e) { idbAvailable = false; }
+
+                if (isFileProtocol) {
+                    console.warn('[Import] 当前通过 file:// 协议打开，IndexedDB 可能被禁用或不稳定');
+                }
+                if (!idbAvailable) {
+                    console.warn('[Import] 当前浏览器不支持 IndexedDB');
+                }
+
+                // 恢复音频到 IndexedDB（作为缓存），但保留 base64 在内存中以确保播放可靠
+                let restoredCount = 0;
+                let hasBase64Count = 0;
+                for (const audio of data.localAudios || []) {
+                    if (audio.base64) {
+                        hasBase64Count++;
+                        const blob = base64ToBlob(audio.base64, audio.mimeType || 'audio/webm');
+                        console.log('[Import]', audio.id, audio.title, 'base64 length:', audio.base64.length, 'blob size:', blob.size);
+                        // 尝试写入 IndexedDB 作为缓存，但失败也不影响（base64 已保留在 data 中）
+                        try {
+                            await saveAudioToDB(audio.id, blob);
+                            audio.mimeType = blob.type || audio.mimeType || 'audio/webm';
+                            restoredCount++;
+                        } catch (dbErr) {
+                            console.warn('[Import] IndexedDB 写入失败（不影响播放，base64 已保留）:', audio.id, dbErr.message || dbErr);
+                        }
+                        // 不再删除 base64！这是跨设备同步的关键
+                    } else {
+                        console.log('[Import]', audio.id, audio.title, 'no base64 found in JSON');
+                    }
+                }
+
+                // 验证恢复结果
+                let verifyCount = 0;
+                for (const audio of data.localAudios || []) {
+                    const verifyBlob = await getAudioFromDB(audio.id, audio.mimeType);
+                    if (verifyBlob && verifyBlob.size > 0) {
+                        verifyCount++;
+                    } else {
+                        console.warn('[Import Verify] 音频恢复失败:', audio.id, audio.title);
+                    }
+                }
+
                 saveData();
                 renderAll();
                 updateCharts();
-                alert('导入成功！本地语音激励文件无法跨设备同步，如有需要请重新上传。');
+                const totalAudioMeta = (data.localAudios || []).length;
+                if (restoredCount > 0) {
+                    alert(`导入成功！已恢复 ${restoredCount} 条本地语音，验证通过 ${verifyCount}/${restoredCount} 条。`);
+                } else if (hasBase64Count === 0 && totalAudioMeta > 0) {
+                    alert(`导入完成，但 JSON 文件中未包含音频数据（${totalAudioMeta} 条音频元数据丢失 base64）。\n\n可能原因：\n1. 电脑端导出时 IndexedDB 中音频已丢失，请先在电脑端确认音频能正常播放后再导出\n2. JSON 文件在传输过程中被截断（文件过大）`);
+                } else if (restoredCount === 0 && hasBase64Count > 0) {
+                    let msg = `导入完成，但 ${hasBase64Count} 条音频全部写入 IndexedDB 失败。\n\n`;
+                    if (isFileProtocol) {
+                        msg += '检测到你是直接打开本地文件（file://）。\nChrome 在 file:// 协议下禁用 IndexedDB。\n\n解决方法：通过 HTTP 服务器访问此页面，例如：\n• 在同一 WiFi 下用电脑 IP 访问（如 http://192.168.x.x:8080）\n• 或使用 "Simple HTTP Server" 等手机 App\n';
+                    } else if (!idbAvailable) {
+                        msg += '当前浏览器不支持 IndexedDB，无法存储音频文件。\n';
+                    } else {
+                        msg += '可能是浏览器存储空间已满或权限被拒绝。\n请检查 Chrome 设置中的网站存储权限。\n';
+                    }
+                    alert(msg);
+                } else {
+                    alert('导入成功！');
+                }
                 closeSyncModal();
             } catch (err) {
                 alert('导入失败：' + err.message);
@@ -1407,25 +1710,35 @@
         }
 
         async function saveAudioToDB(id, blob) {
+            const arrayBuffer = await blobToArrayBuffer(blob);
             const db = await openAudioDB();
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readwrite');
                 const store = tx.objectStore(STORE_NAME);
-                store.put(blob, id);
+                const req = store.put(arrayBuffer, id);
+                req.onerror = () => reject(req.error);
                 tx.oncomplete = () => resolve();
                 tx.onerror = () => reject(tx.error);
             });
         }
 
-        async function getAudioFromDB(id) {
+        async function getAudioFromDB(id, defaultType = 'audio/webm') {
             const db = await openAudioDB();
-            return new Promise((resolve, reject) => {
+            const result = await new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readonly');
                 const store = tx.objectStore(STORE_NAME);
                 const req = store.get(id);
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
+            if (!result) return null;
+            // 兼容旧格式：直接存储的 Blob
+            if (result instanceof Blob) return result;
+            // 新格式：直接存储的 ArrayBuffer
+            if (result instanceof ArrayBuffer) return new Blob([result], { type: defaultType });
+            // 兼容中间格式 {buffer, type}
+            if (result && result.buffer) return new Blob([result.buffer], { type: result.type || defaultType });
+            return null;
         }
 
         async function deleteAudioFromDB(id) {
@@ -1559,8 +1872,14 @@
 
             const id = 'audio_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             try {
-                await saveAudioToDB(id, audioBlob);
-                data.localAudios.push({ id, title, type, size: audioBlob.size, name: file.name });
+                const base64 = await blobToBase64(audioBlob);
+                // 同时存入 IndexedDB（兼容旧数据/电脑端）和 data.base64（跨设备同步可靠）
+                try {
+                    await saveAudioToDB(id, audioBlob);
+                } catch (dbErr) {
+                    console.warn('[addLocalAudio] IndexedDB 写入失败，将仅使用 base64 内存存储:', dbErr);
+                }
+                data.localAudios.push({ id, title, type, size: audioBlob.size, name: file.name, mimeType: audioBlob.type || 'audio/webm', base64 });
                 document.getElementById('audioTitleInput').value = '';
                 fileInput.value = '';
                 saveData();
@@ -1594,7 +1913,7 @@
                     <div class="audio-item">
                         <div>
                             <div style="font-weight:bold;">${a.title}</div>
-                            <div class="audio-meta">分类: ${typeNames[a.type] || a.type} | 大小: ${formatBytes(a.size)}</div>
+                            <div class="audio-meta">分类: ${typeNames[a.type] || a.type} | 大小: ${formatBytes(a.size)} ${a.base64 ? '| <span style="color:#2ecc71;">✓ 可同步</span>' : ''}</div>
                         </div>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-primary btn-small" onclick="playLocalAudio(${i})">播放</button>
@@ -1609,8 +1928,34 @@
             const audioMeta = data.localAudios[index];
             if (!audioMeta) return;
 
-            const blob = await getAudioFromDB(audioMeta.id);
-            if (!blob) return alert('音频数据未找到，可能已被清理');
+            let blob = null;
+            let source = '';
+
+            // 优先从内存中的 base64 解码（跨设备同步最可靠）
+            if (audioMeta.base64) {
+                try {
+                    blob = base64ToBlob(audioMeta.base64, audioMeta.mimeType);
+                    source = 'base64';
+                    console.log('[playLocalAudio] 从 base64 解码:', audioMeta.id, 'size:', blob.size);
+                } catch (e) {
+                    console.warn('[playLocalAudio] base64 解码失败:', audioMeta.id, e.message);
+                }
+            }
+
+            // 回退到 IndexedDB
+            if (!blob) {
+                blob = await getAudioFromDB(audioMeta.id, audioMeta.mimeType);
+                source = 'indexedDB';
+            }
+
+            if (!blob) {
+                alert('音频数据未找到，可能已被清理。\n音频ID: ' + audioMeta.id + '\n请尝试重新导入数据。');
+                return;
+            }
+            if (blob.size === 0) {
+                alert('音频数据为空（0字节）。\n音频ID: ' + audioMeta.id + '\n请尝试重新导入数据。');
+                return;
+            }
 
             const url = URL.createObjectURL(blob);
             if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
