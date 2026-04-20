@@ -71,6 +71,25 @@
             margin-bottom: 25px;
             border: 1px solid rgba(255,255,255,0.1);
         }
+        .section.compact {
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+        }
+        .section.compact .section-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+        }
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .compact-grid .section.compact {
+            margin-bottom: 0;
+        }
         .section-title {
             font-size: 1.3em;
             margin-bottom: 20px;
@@ -483,6 +502,13 @@
             .chart-container { height: 220px; }
             .motivation-text { font-size: 1.3em; }
         }
+
+        @media (max-width: 768px) {
+            .compact-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -511,74 +537,76 @@
             </div>
         </div>
 
-        <!-- 身体指标 -->
-        <div class="section">
-            <div class="section-title">
-                <span>⚡ 身体指标状态</span>
-                <span id="buffSummary" style="font-size:0.8em;color:#2ecc71;"></span>
+        <div class="compact-grid">
+            <!-- 身体指标 -->
+            <div class="section compact">
+                <div class="section-title">
+                    <span>⚡ 身体指标状态</span>
+                    <span id="buffSummary" style="font-size:0.8em;color:#2ecc71;"></span>
+                </div>
+                <div class="body-stats">
+                    <div class="body-stat focus">
+                        <div class="body-value" id="focusVal">50</div>
+                        <div class="body-label">专注力</div>
+                        <div class="buff-indicator" id="focusBuff"></div>
+                        <div class="debuff-indicator" id="focusDebuff"></div>
+                    </div>
+                    <div class="body-stat brain">
+                        <div class="body-value" id="brainVal">50</div>
+                        <div class="body-label">脑力</div>
+                        <div class="buff-indicator" id="brainBuff"></div>
+                        <div class="debuff-indicator" id="brainDebuff"></div>
+                    </div>
+                    <div class="body-stat hormone">
+                        <div class="body-value" id="hormoneVal">50</div>
+                        <div class="body-label">激素恢复</div>
+                        <div class="buff-indicator" id="hormoneBuff"></div>
+                        <div class="debuff-indicator" id="hormoneDebuff"></div>
+                    </div>
+                    <div class="body-stat energy">
+                        <div class="body-value" id="energyVal">50</div>
+                        <div class="body-label">精力</div>
+                        <div class="buff-indicator" id="energyBuff"></div>
+                        <div class="debuff-indicator" id="energyDebuff"></div>
+                    </div>
+                </div>
             </div>
-            <div class="body-stats">
-                <div class="body-stat focus">
-                    <div class="body-value" id="focusVal">50</div>
-                    <div class="body-label">专注力</div>
-                    <div class="buff-indicator" id="focusBuff"></div>
-                    <div class="debuff-indicator" id="focusDebuff"></div>
-                </div>
-                <div class="body-stat brain">
-                    <div class="body-value" id="brainVal">50</div>
-                    <div class="body-label">脑力</div>
-                    <div class="buff-indicator" id="brainBuff"></div>
-                    <div class="debuff-indicator" id="brainDebuff"></div>
-                </div>
-                <div class="body-stat hormone">
-                    <div class="body-value" id="hormoneVal">50</div>
-                    <div class="body-label">激素恢复</div>
-                    <div class="buff-indicator" id="hormoneBuff"></div>
-                    <div class="debuff-indicator" id="hormoneDebuff"></div>
-                </div>
-                <div class="body-stat energy">
-                    <div class="body-value" id="energyVal">50</div>
-                    <div class="body-label">精力</div>
-                    <div class="buff-indicator" id="energyBuff"></div>
-                    <div class="debuff-indicator" id="energyDebuff"></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 习惯打卡 -->
-        <div class="section">
-            <div class="section-title">
-                <span>✅ 每日习惯打卡</span>
-                <span id="habitProgress" style="font-size:0.8em;color:#aaa;">0/0</span>
+            <!-- 习惯打卡 -->
+            <div class="section compact">
+                <div class="section-title">
+                    <span>✅ 每日习惯打卡</span>
+                    <span id="habitProgress" style="font-size:0.8em;color:#aaa;">0/0</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="habitInput" placeholder="输入习惯名称（如：早起、运动、阅读）">
+                    <button class="btn btn-primary" onclick="addHabit()">添加习惯</button>
+                </div>
+                <div class="habit-list" id="habitList">
+                    <div class="empty-state">还没有习惯，添加一个开始自律吧！</div>
+                </div>
             </div>
-            <div class="input-group">
-                <input type="text" id="habitInput" placeholder="输入习惯名称（如：早起、运动、阅读）">
-                <button class="btn btn-primary" onclick="addHabit()">添加习惯</button>
-            </div>
-            <div class="habit-list" id="habitList">
-                <div class="empty-state">还没有习惯，添加一个开始自律吧！</div>
-            </div>
-        </div>
 
-        <!-- 正向提升模块 -->
-        <div class="section">
-            <div class="section-title">
-                <span>⬆️ 正向提升目标</span>
-                <span style="font-size:0.8em;color:#aaa;">自定义目标与 buff 值</span>
-            </div>
-            <div class="input-group">
-                <input type="text" id="goalNameInput" placeholder="目标名称（如：冥想10分钟）">
-                <select id="goalStatInput">
-                    <option value="focus">专注力</option>
-                    <option value="brain">脑力</option>
-                    <option value="hormone">激素恢复</option>
-                    <option value="energy">精力</option>
-                </select>
-                <input type="number" id="goalBuffInput" placeholder="buff值" value="2" min="1" max="20">
-                <button class="btn btn-success" onclick="addGoal()">添加目标</button>
-            </div>
-            <div class="goal-list" id="goalList">
-                <div class="empty-state">还没有正向目标，添加一个来强化自己！</div>
+            <!-- 正向提升模块 -->
+            <div class="section compact">
+                <div class="section-title">
+                    <span>⬆️ 正向提升目标</span>
+                    <span style="font-size:0.8em;color:#aaa;">自定义目标与 buff 值</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="goalNameInput" placeholder="目标名称（如：冥想10分钟）">
+                    <select id="goalStatInput">
+                        <option value="focus">专注力</option>
+                        <option value="brain">脑力</option>
+                        <option value="hormone">激素恢复</option>
+                        <option value="energy">精力</option>
+                    </select>
+                    <input type="number" id="goalBuffInput" placeholder="buff值" value="2" min="1" max="20">
+                    <button class="btn btn-success" onclick="addGoal()">添加目标</button>
+                </div>
+                <div class="goal-list" id="goalList">
+                    <div class="empty-state">还没有正向目标，添加一个来强化自己！</div>
+                </div>
             </div>
         </div>
 
@@ -651,7 +679,7 @@
         </div>
 
         <!-- 数据可视化 -->
-        <div class="section">
+        <div class="section compact">
             <div class="section-title">📊 成长数据可视化</div>
             <div class="charts-grid">
                 <div class="chart-container">
@@ -666,34 +694,36 @@
             </div>
         </div>
 
-        <!-- 失败案例库 -->
-        <div class="section">
-            <div class="section-title">
-                <span>💀 失败案例库</span>
-                <span id="debuffSummary" style="font-size:0.8em;color:#e74c3c;"></span>
+        <div class="compact-grid">
+            <!-- 失败案例库 -->
+            <div class="section compact">
+                <div class="section-title">
+                    <span>💀 失败案例库</span>
+                    <span id="debuffSummary" style="font-size:0.8em;color:#e74c3c;"></span>
+                </div>
+                <div class="failure-list" id="failureList">
+                    <div class="empty-state">还没有失败记录，继续保持！</div>
+                </div>
             </div>
-            <div class="failure-list" id="failureList">
-                <div class="empty-state">还没有失败记录，继续保持！</div>
+
+            <!-- 手动反思按钮 -->
+            <div class="section compact" style="text-align:center;">
+                <button class="btn btn-warning" onclick="showReflection()">📝 手动反思总结</button>
+                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">系统也会每 4 小时自动提醒你反思一次</p>
             </div>
-        </div>
 
-        <!-- 手动反思按钮 -->
-        <div class="section" style="text-align:center;">
-            <button class="btn btn-warning" onclick="showReflection()">📝 手动反思总结</button>
-            <p style="color:#aaa;font-size:0.85em;margin-top:10px;">系统也会每 4 小时自动提醒你反思一次</p>
-        </div>
+            <!-- 数据同步 -->
+            <div class="section compact" style="text-align:center;">
+                <button class="btn btn-primary" onclick="openSyncModal()">🔄 数据同步</button>
+                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
+            </div>
 
-        <!-- 数据同步 -->
-        <div class="section" style="text-align:center;">
-            <button class="btn btn-primary" onclick="openSyncModal()">🔄 数据同步</button>
-            <p style="color:#aaa;font-size:0.85em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
-        </div>
-
-        <!-- 存储诊断 -->
-        <div class="section" style="text-align:center;">
-            <button class="btn btn-warning" onclick="runStorageDiagnostics()">🔍 诊断存储状态</button>
-            <p style="color:#aaa;font-size:0.85em;margin-top:10px;">检测 IndexedDB 音频是否完整，帮助排查同步问题</p>
-            <div id="diagResult" style="margin-top:15px;text-align:left;font-size:0.85em;display:none;"></div>
+            <!-- 存储诊断 -->
+            <div class="section compact" style="text-align:center;">
+                <button class="btn btn-warning" onclick="runStorageDiagnostics()">🔍 诊断存储状态</button>
+                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">检测 IndexedDB 音频是否完整，帮助排查同步问题</p>
+                <div id="diagResult" style="margin-top:15px;text-align:left;font-size:0.85em;display:none;"></div>
+            </div>
         </div>
     </div>
 
@@ -1667,6 +1697,7 @@
         }
 
         function deleteMotivationVideo(index) {
+            if (!confirm('确定删除这条激励视频吗？')) return;
             data.motivationVideos.splice(index, 1);
             saveData();
             renderAll();
