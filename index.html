@@ -99,6 +99,41 @@
             justify-content: space-between;
             align-items: center;
         }
+        .section.collapsible .section-title {
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
+            max-height: 3000px;
+            opacity: 1;
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
 
         .input-group {
             display: flex;
@@ -161,6 +196,29 @@
         .habit-info, .goal-info { flex: 1; }
         .habit-name, .goal-name { font-weight: bold; font-size: 1.1em; }
         .habit-streak { color: #f39c12; font-size: 0.9em; }
+        .week-dots-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            align-items: center;
+        }
+        .week-label {
+            font-size: 0.65em;
+            color: #888;
+            width: 18px;
+            text-align: center;
+        }
+        .week-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e74c3c;
+            transition: all 0.3s;
+        }
+        .week-dot.checked {
+            background: #2ecc71;
+            box-shadow: 0 0 6px #2ecc71;
+        }
         .goal-buff { color: #2ecc71; font-size: 0.9em; }
         .failure-meta { color: #aaa; font-size: 0.85em; }
 
@@ -634,47 +692,57 @@
         </div>
 
         <!-- 激励视频库 -->
-        <div class="section">
-            <div class="section-title">
-                <span>🎬 激励视频库</span>
-                <span style="font-size:0.8em;color:#aaa;">管理 YouTube 激励视频</span>
+        <div class="section collapsible">
+            <div class="section-title" onclick="toggleSection(this)">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span>🎬 激励视频库</span>
+                    <span style="font-size:0.8em;color:#aaa;">管理 YouTube 激励视频</span>
+                </div>
+                <button class="toggle-btn" aria-label="展开/收起">▶</button>
             </div>
-            <div class="input-group">
-                <input type="text" id="videoTitleInput" placeholder="视频标题（如：科比退役演讲）">
-                <input type="text" id="videoUrlInput" placeholder="YouTube 链接或视频 ID">
-                <select id="videoTypeInput">
-                    <option value="noFap">戒色激励</option>
-                    <option value="focus">专注力激励</option>
-                    <option value="power">动力激励</option>
-                    <option value="letgo">放下激励</option>
-                </select>
-                <input type="number" id="videoStartInput" placeholder="起始秒数" value="0" min="0">
-                <button class="btn btn-success" onclick="addMotivationVideo()">添加视频</button>
-            </div>
-            <div class="video-list" id="videoList">
-                <div class="empty-state">还没有激励视频，添加一个 YouTube 链接吧！</div>
+            <div class="collapsible-content collapsed">
+                <div class="input-group">
+                    <input type="text" id="videoTitleInput" placeholder="视频标题（如：科比退役演讲）">
+                    <input type="text" id="videoUrlInput" placeholder="YouTube 链接或视频 ID">
+                    <select id="videoTypeInput">
+                        <option value="noFap">戒色激励</option>
+                        <option value="focus">专注力激励</option>
+                        <option value="power">动力激励</option>
+                        <option value="letgo">放下激励</option>
+                    </select>
+                    <input type="number" id="videoStartInput" placeholder="起始秒数" value="0" min="0">
+                    <button class="btn btn-success" onclick="addMotivationVideo()">添加视频</button>
+                </div>
+                <div class="video-list" id="videoList">
+                    <div class="empty-state">还没有激励视频，添加一个 YouTube 链接吧！</div>
+                </div>
             </div>
         </div>
 
         <!-- 本地语音激励库 -->
-        <div class="section">
-            <div class="section-title">
-                <span>🎙️ 本地语音激励库</span>
-                <span style="font-size:0.8em;color:#aaa;">上传本地音频或视频（视频会自动提取为音频）</span>
+        <div class="section collapsible">
+            <div class="section-title" onclick="toggleSection(this)">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span>🎙️ 本地语音激励库</span>
+                    <span style="font-size:0.8em;color:#aaa;">上传本地音频或视频（视频会自动提取为音频）</span>
+                </div>
+                <button class="toggle-btn" aria-label="展开/收起">▶</button>
             </div>
-            <div class="input-group">
-                <input type="text" id="audioTitleInput" placeholder="媒体标题（如：科比演讲片段）">
-                <select id="audioTypeInput">
-                    <option value="noFap">戒色激励</option>
-                    <option value="focus">专注力激励</option>
-                    <option value="power">动力激励</option>
-                    <option value="letgo">放下激励</option>
-                </select>
-                <input type="file" id="audioFileInput" accept="audio/*,video/*" style="border-radius:10px;color:#fff;">
-                <button class="btn btn-success" id="audioUploadBtn" onclick="addLocalAudio()">上传媒体</button>
-            </div>
-            <div class="audio-list" id="audioList">
-                <div class="empty-state">还没有本地语音，上传一段音频或视频为自己加油打气吧！</div>
+            <div class="collapsible-content collapsed">
+                <div class="input-group">
+                    <input type="text" id="audioTitleInput" placeholder="媒体标题（如：科比演讲片段）">
+                    <select id="audioTypeInput">
+                        <option value="noFap">戒色激励</option>
+                        <option value="focus">专注力激励</option>
+                        <option value="power">动力激励</option>
+                        <option value="letgo">放下激励</option>
+                    </select>
+                    <input type="file" id="audioFileInput" accept="audio/*,video/*" style="border-radius:10px;color:#fff;">
+                    <button class="btn btn-success" id="audioUploadBtn" onclick="addLocalAudio()">上传媒体</button>
+                </div>
+                <div class="audio-list" id="audioList">
+                    <div class="empty-state">还没有本地语音，上传一段音频或视频为自己加油打气吧！</div>
+                </div>
             </div>
         </div>
 
@@ -902,6 +970,13 @@
         async function init() {
             // 自动修复：为旧数据从 IndexedDB 补回 base64
             await migrateOldAudiosToBase64();
+            // 兼容旧习惯数据：补 history
+            data.habits.forEach(h => {
+                if (!h.history) {
+                    h.history = {};
+                    if (h.lastCheckin) h.history[h.lastCheckin] = true;
+                }
+            });
             saveData();
             renderAll();
             initCharts();
@@ -952,6 +1027,15 @@
                     console.error('[saveData] 保存失败:', e);
                 }
             }
+        }
+
+        // ========== 折叠控制 ==========
+        function toggleSection(titleEl) {
+            const content = titleEl.nextElementSibling;
+            const btn = titleEl.querySelector('.toggle-btn');
+            if (!content || !btn) return;
+            const isCollapsed = content.classList.toggle('collapsed');
+            btn.textContent = isCollapsed ? '▶' : '▼';
         }
 
         // ========== 渲染 ==========
@@ -1040,21 +1124,57 @@
             });
         }
 
+        function getWeekDays() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0=周日, 1=周一...
+            const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - diffToMonday);
+            const weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            const days = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                days.push({ date: d.toISOString().split('T')[0], name: weekNames[i] });
+            }
+            return days;
+        }
+
         function renderHabits() {
             const list = document.getElementById('habitList');
             const today = getTodayStr();
+            const weekDays = getWeekDays();
+            const currentMonth = today.slice(0, 7); // "YYYY-MM"
+
             if (data.habits.length === 0) {
                 list.innerHTML = '<div class="empty-state">还没有习惯，添加一个开始自律吧！</div>';
             } else {
                 let completedToday = 0;
                 list.innerHTML = data.habits.map((h, i) => {
+                    // 兼容旧数据：补 history
+                    if (!h.history) {
+                        h.history = {};
+                        if (h.lastCheckin) h.history[h.lastCheckin] = true;
+                    }
+
                     const isDone = h.lastCheckin === today;
                     if (isDone) completedToday++;
+
+                    const monthCount = Object.keys(h.history).filter(d => d.startsWith(currentMonth)).length;
+
+                    const weekLabels = weekDays.map(d => `<span class="week-label">${d.name.replace('周', '')}</span>`).join('');
+                    const weekIcons = weekDays.map(d => {
+                        const checked = h.history[d.date];
+                        return `<div class="week-dot ${checked ? 'checked' : ''}" title="${d.name} ${d.date}"></div>`;
+                    }).join('');
+
                     return `
                         <div class="habit-item ${isDone ? 'completed' : ''}">
                             <div class="habit-info">
                                 <div class="habit-name">${h.name}</div>
-                                <div class="habit-streak">🔥 连续 ${h.streak || 0} 天</div>
+                                <div class="habit-streak">🔥 连续 ${h.streak || 0} 天 | 本月 ${monthCount} 天</div>
+                                <div class="week-dots-row">${weekLabels}</div>
+                                <div class="week-dots-row">${weekIcons}</div>
                             </div>
                             <button class="btn ${isDone ? 'btn-small' : 'btn-success'}"
                                 ${isDone ? 'disabled' : ''} onclick="checkinHabit(${i})">
@@ -1121,7 +1241,7 @@
             const input = document.getElementById('habitInput');
             const name = input.value.trim();
             if (!name) return alert('请输入习惯名称');
-            data.habits.push({ name, streak: 0, lastCheckin: null });
+            data.habits.push({ name, streak: 0, lastCheckin: null, history: {} });
             input.value = '';
             saveData();
             renderAll();
@@ -1131,6 +1251,9 @@
             const today = getTodayStr();
             const h = data.habits[index];
             if (h.lastCheckin === today) return;
+
+            if (!h.history) h.history = {};
+            h.history[today] = true;
 
             const yesterday = getYesterdayStr();
             if (h.lastCheckin === yesterday) {
@@ -1513,6 +1636,13 @@
                 if (!data.motivationVideos) data.motivationVideos = [];
                 if (!data.rewardsUnlocked) data.rewardsUnlocked = [];
                 if (!data.localAudios) data.localAudios = [];
+                // 兼容旧习惯数据：补 history
+                (data.habits || []).forEach(h => {
+                    if (!h.history) {
+                        h.history = {};
+                        if (h.lastCheckin) h.history[h.lastCheckin] = true;
+                    }
+                });
 
                 // 检测运行环境
                 const isFileProtocol = location.protocol === 'file:';
