@@ -10,15 +10,15 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
             min-height: 100vh;
-            color: #eee;
+            color: #1f2937;
             padding-bottom: 40px;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; font-size: 2.5em; margin-bottom: 10px; text-shadow: 0 0 20px #e94560; }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 30px; }
+        h1 { text-align: center; font-size: 2.5em; margin-bottom: 10px; color: #1f2937; }
+        .subtitle { text-align: center; color: #6b7280; margin-bottom: 30px; }
 
         .stats-bar {
             display: grid;
@@ -26,19 +26,58 @@
             gap: 15px;
             margin-bottom: 30px;
         }
-        .stat-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            transition: transform 0.3s;
+        .stats-bar.compact {
+            display: block;
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px 16px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
         }
-        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(0,0,0,0.06);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
         .stat-value { font-size: 2em; font-weight: bold; color: #e94560; }
-        .stat-label { color: #aaa; font-size: 0.9em; margin-top: 5px; }
+        .stat-label { color: #6b7280; font-size: 0.9em; margin-top: 5px; }
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            font-size: 1.25em;
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .stat-item b { color: #e94560; font-size: 1.35em; }
+        .stat-divider {
+            width: 1px;
+            height: 18px;
+            background: #d1d5db;
+            display: inline-block;
+        }
+        .progress-bar.compact {
+            height: 6px;
+            margin-top: 8px;
+            border-radius: 3px;
+        }
+        .progress-bar.compact .progress-fill {
+            border-radius: 3px;
+        }
         .tier-bronze { color: #cd7f32; }
-        .tier-silver { color: #c0c0c0; }
+        .tier-silver { color: #6b7280; }
         .tier-gold { color: #ffd700; }
         .tier-king { color: #ff6b6b; text-shadow: 0 0 10px #ff6b6b; }
 
@@ -49,27 +88,29 @@
             margin-bottom: 30px;
         }
         .body-stat {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            background: #fff;
+            border-radius: 12px;
             padding: 15px;
             text-align: center;
             border-left: 4px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        .body-stat.focus { border-color: #3498db; }
-        .body-stat.brain { border-color: #9b59b6; }
-        .body-stat.hormone { border-color: #2ecc71; }
-        .body-stat.energy { border-color: #f39c12; }
-        .body-value { font-size: 1.5em; font-weight: bold; }
-        .body-label { font-size: 0.8em; color: #aaa; }
-        .buff-indicator { color: #2ecc71; font-size: 0.8em; }
-        .debuff-indicator { color: #e74c3c; font-size: 0.8em; }
+        .body-stat.focus { border-color: #3b82f6; }
+        .body-stat.brain { border-color: #8b5cf6; }
+        .body-stat.hormone { border-color: #10b981; }
+        .body-stat.energy { border-color: #f59e0b; }
+        .body-value { font-size: 1.65em; font-weight: bold; }
+        .body-label { font-size: 0.9em; color: #6b7280; }
+        .buff-indicator { color: #10b981; font-size: 0.8em; }
+        .debuff-indicator { color: #ef4444; font-size: 0.8em; }
 
         .section {
-            background: rgba(255,255,255,0.05);
+            background: #fff;
             border-radius: 20px;
             padding: 25px;
             margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
         .section.compact {
             padding: 15px;
@@ -98,15 +139,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: #1f2937;
         }
         .section.collapsible .section-title {
             cursor: pointer;
             user-select: none;
         }
         .toggle-btn {
-            background: rgba(255,255,255,0.1);
+            background: #f3f4f6;
             border: none;
-            color: #fff;
+            color: #374151;
             width: 32px;
             height: 32px;
             border-radius: 8px;
@@ -120,7 +162,7 @@
             flex-shrink: 0;
         }
         .toggle-btn:hover {
-            background: rgba(255,255,255,0.25);
+            background: #e5e7eb;
         }
         .collapsible-content {
             overflow: hidden;
@@ -144,20 +186,26 @@
         .input-group input, .input-group select {
             padding: 12px 15px;
             border-radius: 10px;
-            border: none;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #1f2937;
             font-size: 1em;
             flex: 1;
             min-width: 120px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
         }
         .input-group input[type="file"] {
             flex: 1;
             min-width: 120px;
             padding: 10px;
-            background: rgba(255,255,255,0.05);
+            background: #f9fafb;
         }
-        .input-group input::placeholder { color: #888; }
+        .input-group input::placeholder { color: #9ca3af; }
         .btn {
             padding: 12px 25px;
             border-radius: 10px;
@@ -175,27 +223,55 @@
         .btn-danger { background: #e74c3c; color: white; }
         .btn-small { padding: 6px 12px; font-size: 0.85em; }
 
-        .habit-list, .goal-list, .failure-list {
+        .habit-list, .goal-list, .failure-list, .point-reward-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .habit-item, .goal-item, .failure-item {
-            background: rgba(255,255,255,0.05);
+        .habit-item, .goal-item, .failure-item, .point-reward-item {
+            background: #f9fafb;
             padding: 15px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.04);
+            position: relative;
         }
-        .habit-item:hover, .goal-item:hover { background: rgba(255,255,255,0.1); }
-        .habit-item.completed { border-left: 4px solid #2ecc71; opacity: 0.8; }
-        .goal-item.completed { border-left: 4px solid #3498db; opacity: 0.8; }
-        .failure-item { border-left: 4px solid #e74c3c; }
-        .habit-info, .goal-info { flex: 1; }
-        .habit-name, .goal-name { font-weight: bold; font-size: 1.1em; }
-        .habit-streak { color: #f39c12; font-size: 0.9em; }
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+        .delete-btn:hover {
+            background: #ef4444;
+            color: #fff;
+            transform: scale(1.1);
+        }
+        .habit-item:hover, .goal-item:hover, .point-reward-item:hover { background: #f3f4f6; }
+        .habit-item.completed { border-left: 4px solid #10b981; opacity: 0.85; }
+        .goal-item.completed { border-left: 4px solid #3b82f6; opacity: 0.85; }
+        .failure-item { border-left: 4px solid #ef4444; }
+        .point-reward-item { border-left: 4px solid #f59e0b; }
+        .habit-info, .goal-info, .point-reward-info { flex: 1; }
+        .habit-name, .goal-name, .point-reward-name { font-weight: bold; font-size: 1.1em; }
+        .habit-streak { color: #f59e0b; font-size: 0.9em; }
         .week-dots-row {
             display: flex;
             gap: 6px;
@@ -204,7 +280,7 @@
         }
         .week-label {
             font-size: 0.65em;
-            color: #888;
+            color: #9ca3af;
             width: 18px;
             text-align: center;
         }
@@ -212,15 +288,184 @@
             width: 18px;
             height: 18px;
             border-radius: 50%;
-            background: #e74c3c;
+            background: #fca5a5;
             transition: all 0.3s;
         }
         .week-dot.checked {
-            background: #2ecc71;
-            box-shadow: 0 0 6px #2ecc71;
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
         }
-        .goal-buff { color: #2ecc71; font-size: 0.9em; }
-        .failure-meta { color: #aaa; font-size: 0.85em; }
+        .goal-buff { color: #10b981; font-size: 0.9em; }
+        .failure-meta { color: #6b7280; font-size: 0.85em; }
+
+        .plant-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 20px;
+            min-height: 280px;
+            background: #0f172a;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .plant-bg {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .plant-stage {
+            position: absolute;
+            top: 12px; left: 16px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #fbbf24;
+            background: rgba(15,23,42,0.6);
+            border: 1px solid rgba(251,191,36,0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+        }
+        .plant-status {
+            position: absolute;
+            top: 12px; right: 16px;
+            font-size: 0.8em;
+            color: #a5b4fc;
+            background: rgba(15,23,42,0.5);
+            border: 1px solid rgba(139,92,246,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+        }
+        .plant-stage {
+            position: absolute;
+            top: 12px; left: 16px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #fbbf24;
+            background: rgba(15,23,42,0.6);
+            border: 1px solid rgba(251,191,36,0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            backdrop-filter: blur(4px);
+        }
+        .plant-stage:hover {
+            background: rgba(251,191,36,0.15);
+            border-color: rgba(251,191,36,0.5);
+            box-shadow: 0 0 12px rgba(251,191,36,0.25);
+            transform: translateY(-1px);
+        }
+        .plant-status {
+            position: absolute;
+            top: 12px; right: 16px;
+            font-size: 0.8em;
+            color: #a5b4fc;
+            background: rgba(15,23,42,0.5);
+            border: 1px solid rgba(139,92,246,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 植物预览弹窗 */
+        .plant-preview-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10004;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .plant-preview-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .plant-preview-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .plant-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .plant-preview-item {
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(139,92,246,0.15);
+        }
+        .plant-preview-item .preview-lv {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 6px;
+        }
+        .plant-preview-item .preview-name {
+            font-size: 0.72em;
+            color: #a5b4fc;
+            margin-top: 4px;
+        }
+        .plant-preview-actions {
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (max-width: 640px) {
+            .plant-preview-grid { grid-template-columns: repeat(3, 1fr); }
+            .plant-preview-content { padding: 20px; }
+        }
+        @media (max-width: 400px) {
+            .plant-preview-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .plant-svg-wrap {
+            transition: all 0.6s ease;
+            z-index: 1;
+        }
+        .plant-svg-wrap svg {
+            display: block;
+            transition: all 0.6s ease;
+        }
+        .plant-glow svg {
+            filter: drop-shadow(0 0 16px rgba(250,204,21,0.9)) drop-shadow(0 0 32px rgba(251,191,36,0.6)) drop-shadow(0 0 48px rgba(251,191,36,0.3)) brightness(1.15) saturate(1.2);
+            animation: plantPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes plantPulse {
+            0%, 100% { filter: drop-shadow(0 0 16px rgba(250,204,21,0.9)) drop-shadow(0 0 32px rgba(251,191,36,0.6)) drop-shadow(0 0 48px rgba(251,191,36,0.3)) brightness(1.15) saturate(1.2); }
+            50% { filter: drop-shadow(0 0 24px rgba(250,204,21,1)) drop-shadow(0 0 48px rgba(251,191,36,0.8)) drop-shadow(0 0 72px rgba(251,191,36,0.4)) brightness(1.25) saturate(1.3); }
+        }
+        .plant-dim svg {
+            filter: brightness(0.55) saturate(0.6) drop-shadow(0 0 4px rgba(100,116,139,0.3));
+        }
+        .plant-very-dim svg {
+            filter: brightness(0.35) saturate(0.4) grayscale(0.45) drop-shadow(0 0 4px rgba(71,85,105,0.2));
+        }
 
         .charts-grid {
             display: grid;
@@ -229,11 +474,13 @@
             margin-top: 20px;
         }
         .chart-container {
-            background: rgba(0,0,0,0.2);
+            background: #fff;
             border-radius: 15px;
             padding: 15px;
             position: relative;
             height: 300px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         /* 燃向短视频覆盖层 */
@@ -322,26 +569,28 @@
         }
         .video-list { display: flex; flex-direction: column; gap: 10px; }
         .video-item {
-            background: rgba(255,255,255,0.05);
+            background: #f9fafb;
             padding: 12px;
             border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(0,0,0,0.04);
         }
-        .video-meta { color: #aaa; font-size: 0.85em; }
+        .video-meta { color: #6b7280; font-size: 0.85em; }
 
         /* 本地语音激励 */
         .audio-list { display: flex; flex-direction: column; gap: 10px; }
         .audio-item {
-            background: rgba(255,255,255,0.05);
+            background: #f9fafb;
             padding: 12px;
             border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(0,0,0,0.04);
         }
-        .audio-meta { color: #aaa; font-size: 0.85em; }
+        .audio-meta { color: #6b7280; font-size: 0.85em; }
         .audio-player-wrap {
             margin-top: 20px;
             width: 90vw;
@@ -366,51 +615,54 @@
         .reflection-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.6);
             z-index: 10000;
             display: none;
             justify-content: center;
             align-items: center;
         }
         .reflection-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #fff;
             padding: 40px;
             border-radius: 20px;
             max-width: 500px;
             width: 90%;
-            border: 2px solid #e94560;
+            border: 1px solid #e5e7eb;
             text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
         .reflection-title { font-size: 1.5em; margin-bottom: 20px; color: #e94560; }
-        .reflection-content p { margin-bottom: 20px; line-height: 1.6; }
+        .reflection-content p { margin-bottom: 20px; line-height: 1.6; color: #4b5563; }
         .reflection-options { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; }
-        .reflection-input { width: 100%; padding: 12px; border-radius: 10px; border: none; margin-bottom: 15px; }
+        .reflection-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; margin-bottom: 15px; background: #fff; color: #1f2937; outline: none; }
+        .reflection-input:focus { border-color: #e94560; box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1); }
 
         /* 奖励弹窗 */
         .reward-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.6);
             z-index: 10001;
             display: none;
             justify-content: center;
             align-items: center;
         }
         .reward-content {
-            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            background: #fff;
             padding: 50px;
             border-radius: 25px;
             text-align: center;
-            border: 3px solid #ffd700;
+            border: 2px solid #ffd700;
             max-width: 500px;
             animation: rewardPop 0.5s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
 
         /* 同步弹窗 */
         .sync-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.6);
             z-index: 10002;
             display: none;
             justify-content: center;
@@ -418,14 +670,15 @@
             padding: 20px;
         }
         .sync-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #fff;
             padding: 30px;
             border-radius: 20px;
             max-width: 520px;
             width: 100%;
-            border: 2px solid #3498db;
+            border: 1px solid #e5e7eb;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
         .sync-tabs {
             display: flex;
@@ -437,12 +690,13 @@
             padding: 12px;
             border: none;
             border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            color: #eee;
+            background: #f3f4f6;
+            color: #374151;
             cursor: pointer;
             font-size: 1em;
+            transition: all 0.2s;
         }
-        .sync-tab.active { background: #3498db; color: white; font-weight: bold; }
+        .sync-tab.active { background: #3b82f6; color: white; font-weight: bold; }
         .sync-panel { display: none; }
         .sync-panel.active { display: block; }
         .qr-wrap {
@@ -451,19 +705,22 @@
             border-radius: 12px;
             display: inline-block;
             margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
         }
         .sync-textarea {
             width: 100%;
             min-height: 120px;
             padding: 12px;
             border-radius: 10px;
-            border: none;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            color: #1f2937;
             font-family: monospace;
             font-size: 0.85em;
             resize: vertical;
+            outline: none;
         }
+        .sync-textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         .sync-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
         .sync-actions .btn { flex: 1; min-width: 120px; }
         #reader {
@@ -481,7 +738,7 @@
         .reward-text { font-size: 1.3em; margin-bottom: 30px; }
 
         .progress-bar {
-            width: 100%; height: 20px; background: rgba(255,255,255,0.1);
+            width: 100%; height: 20px; background: #e5e7eb;
             border-radius: 10px; overflow: hidden; margin-top: 10px;
         }
         .progress-fill {
@@ -489,8 +746,24 @@
             transition: width 0.5s ease;
         }
 
-        .empty-state { text-align: center; color: #666; padding: 30px; font-style: italic; }
+        .empty-state { text-align: center; color: #9ca3af; padding: 30px; font-style: italic; }
         .hidden { display: none !important; }
+
+        /* 图标徽章 */
+        .icon-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            margin-right: 8px;
+            vertical-align: middle;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(233, 69, 96, 0.25);
+        }
 
         @media (max-width: 768px) {
             .container { padding: 12px; }
@@ -498,14 +771,18 @@
             .subtitle { font-size: 0.9em; margin-bottom: 20px; }
 
             .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+            .stats-bar.compact { padding: 10px 12px; }
             .stat-card { padding: 15px 10px; }
             .stat-value { font-size: 1.6em; }
             .stat-label { font-size: 0.8em; }
+            .stat-item { font-size: 1.15em; }
+            .stat-item b { font-size: 1.25em; }
+            .stat-divider { height: 14px; }
 
             .body-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
             .body-stat { padding: 12px 8px; }
-            .body-value { font-size: 1.3em; }
-            .body-label { font-size: 0.75em; }
+            .body-value { font-size: 1.45em; }
+            .body-label { font-size: 0.85em; }
 
             .section { padding: 18px; margin-bottom: 18px; border-radius: 16px; }
             .section-title { font-size: 1.1em; margin-bottom: 15px; padding-bottom: 8px; }
@@ -516,18 +793,20 @@
             .btn { padding: 10px 18px; }
             .input-group .btn { width: 100%; }
 
-            .habit-item, .goal-item, .failure-item, .video-item, .audio-item {
+            .habit-item, .goal-item, .failure-item, .video-item, .audio-item, .point-reward-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
                 padding: 12px;
             }
-            .habit-info, .goal-info { width: 100%; }
-            .habit-name, .goal-name { font-size: 1em; }
-            .habit-item button, .goal-item button, .video-item button, .audio-item button { align-self: stretch; width: 100%; }
+            .habit-info, .goal-info, .point-reward-info { width: 100%; }
+            .habit-name, .goal-name, .point-reward-name { font-size: 1em; }
+            .habit-item button:not(.delete-btn), .goal-item button:not(.delete-btn), .video-item button, .audio-item button, .point-reward-item button:not(.delete-btn) { align-self: stretch; width: 100%; }
 
             .charts-grid { grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
             .chart-container { height: 260px; padding: 10px; }
+            .plant-container { min-height: 200px; padding: 15px; }
+            .plant-stage, .plant-status { font-size: 0.75em; }
 
             .motivation-text { font-size: 1.6em; margin-bottom: 12px; }
             .motivation-sub { font-size: 1em; margin-bottom: 12px; }
@@ -561,83 +840,120 @@
             .motivation-text { font-size: 1.3em; }
         }
 
+        /* 删除确认弹窗 */
+        .delete-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10003;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .delete-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .delete-title { font-size: 1.4em; margin-bottom: 15px; color: #ef4444; }
+        .delete-content p { margin-bottom: 15px; line-height: 1.6; color: #4b5563; }
+        .delete-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; margin-bottom: 20px; background: #fff; color: #1f2937; outline: none; font-size: 1em; }
+        .delete-input:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
+        .delete-actions { display: flex; gap: 12px; justify-content: center; }
+        .delete-actions .btn { flex: 1; }
+
         @media (max-width: 768px) {
             .compact-grid {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
+            .delete-content { padding: 25px 20px; }
+            .delete-actions { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔥 自律升级打卡器 RPG</h1>
+        <h1><span class="icon-badge" style="width:48px;height:48px;border-radius:14px;font-size:1.4em;margin-right:12px;background:linear-gradient(135deg, #e94560, #ff6b6b);">🔥</span>自律升级打卡器 RPG</h1>
         <p class="subtitle">每一次自律，都是对自己的一次升级</p>
 
         <!-- 顶部统计 -->
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-value" id="levelDisplay">1</div>
-                <div class="stat-label">当前等级</div>
-                <div class="progress-bar"><div class="progress-fill" id="xpBar" style="width: 0%"></div></div>
+        <div class="stats-bar compact">
+            <div class="stat-row">
+                <span class="stat-item">Lv.<b id="levelDisplay">1</b></span>
+                <span class="stat-divider"></span>
+                <span class="stat-item tier-bronze" id="tierDisplay">青铜</span>
+                <span class="stat-divider"></span>
+                <span class="stat-item"><b id="totalXPDisplay">0</b> <small>XP</small></span>
+                <span class="stat-divider"></span>
+                <span class="stat-item">🪙 <b id="pointsDisplay">0</b> <small>积分</small></span>
+                <span class="stat-divider"></span>
+                <span class="stat-item">🔥 <b id="streakDisplay">0</b> <small>天</small></span>
+                <span class="stat-divider"></span>
+                <button class="btn btn-small" onclick="openXpDetail()" style="padding:4px 10px;font-size:0.8em;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;">详细</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-value tier-bronze" id="tierDisplay">青铜</div>
-                <div class="stat-label">当前段位</div>
+            <div class="progress-bar compact"><div class="progress-fill" id="xpBar" style="width: 0%"></div></div>
+            <div class="stat-row" style="margin-top:6px;justify-content:flex-end;gap:12px;">
+                <span id="buffSummary" style="font-size:0.95em;color:#10b981;"></span>
+                <span id="debuffSummary" style="font-size:0.95em;color:#ef4444;"></span>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalXPDisplay">0</div>
-                <div class="stat-label">总 XP</div>
+            <div class="body-stats" style="margin-top:10px;margin-bottom:0;">
+                <div class="body-stat focus">
+                    <div class="body-value" id="focusVal">50</div>
+                    <div class="body-label">专注力</div>
+                    <div class="buff-indicator" id="focusBuff"></div>
+                    <div class="debuff-indicator" id="focusDebuff"></div>
+                </div>
+                <div class="body-stat brain">
+                    <div class="body-value" id="brainVal">50</div>
+                    <div class="body-label">脑力</div>
+                    <div class="buff-indicator" id="brainBuff"></div>
+                    <div class="debuff-indicator" id="brainDebuff"></div>
+                </div>
+                <div class="body-stat hormone">
+                    <div class="body-value" id="hormoneVal">50</div>
+                    <div class="body-label">激素恢复</div>
+                    <div class="buff-indicator" id="hormoneBuff"></div>
+                    <div class="debuff-indicator" id="hormoneDebuff"></div>
+                </div>
+                <div class="body-stat energy">
+                    <div class="body-value" id="energyVal">50</div>
+                    <div class="body-label">精力</div>
+                    <div class="buff-indicator" id="energyBuff"></div>
+                    <div class="debuff-indicator" id="energyDebuff"></div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="streakDisplay">0</div>
-                <div class="stat-label">连续打卡天</div>
+            <div class="motivation-btns" style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
+                <button class="btn btn-primary" onclick="triggerMotivation('noFap')" style="background:linear-gradient(135deg,#e94560,#c0392b);display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;font-size:0.95em;">
+                    <span class="icon-badge" style="width:24px;height:24px;border-radius:6px;font-size:0.9em;background:rgba(255,255,255,0.2);box-shadow:none;">🛡️</span>戒色
+                </button>
+                <button class="btn btn-primary" onclick="triggerMotivation('focus')" style="background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;font-size:0.95em;">
+                    <span class="icon-badge" style="width:24px;height:24px;border-radius:6px;font-size:0.9em;background:rgba(255,255,255,0.2);box-shadow:none;">🎯</span>专注
+                </button>
+                <button class="btn btn-primary" onclick="triggerMotivation('power')" style="background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;font-size:0.95em;">
+                    <span class="icon-badge" style="width:24px;height:24px;border-radius:6px;font-size:0.9em;background:rgba(255,255,255,0.2);box-shadow:none;">⚡</span>动力
+                </button>
+                <button class="btn btn-primary" onclick="triggerMotivation('letgo')" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;font-size:0.95em;">
+                    <span class="icon-badge" style="width:24px;height:24px;border-radius:6px;font-size:0.9em;background:rgba(255,255,255,0.2);box-shadow:none;">🍃</span>放下
+                </button>
             </div>
         </div>
 
         <div class="compact-grid">
-            <!-- 身体指标 -->
-            <div class="section compact">
-                <div class="section-title">
-                    <span>⚡ 身体指标状态</span>
-                    <span id="buffSummary" style="font-size:0.8em;color:#2ecc71;"></span>
-                </div>
-                <div class="body-stats">
-                    <div class="body-stat focus">
-                        <div class="body-value" id="focusVal">50</div>
-                        <div class="body-label">专注力</div>
-                        <div class="buff-indicator" id="focusBuff"></div>
-                        <div class="debuff-indicator" id="focusDebuff"></div>
-                    </div>
-                    <div class="body-stat brain">
-                        <div class="body-value" id="brainVal">50</div>
-                        <div class="body-label">脑力</div>
-                        <div class="buff-indicator" id="brainBuff"></div>
-                        <div class="debuff-indicator" id="brainDebuff"></div>
-                    </div>
-                    <div class="body-stat hormone">
-                        <div class="body-value" id="hormoneVal">50</div>
-                        <div class="body-label">激素恢复</div>
-                        <div class="buff-indicator" id="hormoneBuff"></div>
-                        <div class="debuff-indicator" id="hormoneDebuff"></div>
-                    </div>
-                    <div class="body-stat energy">
-                        <div class="body-value" id="energyVal">50</div>
-                        <div class="body-label">精力</div>
-                        <div class="buff-indicator" id="energyBuff"></div>
-                        <div class="debuff-indicator" id="energyDebuff"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- 习惯打卡 -->
             <div class="section compact">
                 <div class="section-title">
-                    <span>✅ 每日习惯打卡</span>
-                    <span id="habitProgress" style="font-size:0.8em;color:#aaa;">0/0</span>
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #10b981, #34d399);">✅</span>每日习惯打卡</span>
+                    <span id="habitProgress" style="font-size:0.8em;color:#9ca3af;">0/0</span>
                 </div>
                 <div class="input-group">
                     <input type="text" id="habitInput" placeholder="输入习惯名称（如：早起、运动、阅读）">
+                    <input type="number" id="habitPointsInput" placeholder="积分" value="10" min="1" style="width:80px;flex:0 1 auto;">
                     <button class="btn btn-primary" onclick="addHabit()">添加习惯</button>
                 </div>
                 <div class="habit-list" id="habitList">
@@ -648,8 +964,8 @@
             <!-- 正向提升模块 -->
             <div class="section compact">
                 <div class="section-title">
-                    <span>⬆️ 正向提升目标</span>
-                    <span style="font-size:0.8em;color:#aaa;">自定义目标与 buff 值</span>
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">⬆️</span>正向提升目标</span>
+                    <span style="font-size:0.8em;color:#9ca3af;">自定义目标与 buff 值</span>
                 </div>
                 <div class="input-group">
                     <input type="text" id="goalNameInput" placeholder="目标名称（如：冥想10分钟）">
@@ -660,43 +976,37 @@
                         <option value="energy">精力</option>
                     </select>
                     <input type="number" id="goalBuffInput" placeholder="buff值" value="2" min="1" max="20">
+                    <input type="number" id="goalPointsInput" placeholder="积分" value="5" min="1" style="width:80px;flex:0 1 auto;">
                     <button class="btn btn-success" onclick="addGoal()">添加目标</button>
                 </div>
                 <div class="goal-list" id="goalList">
                     <div class="empty-state">还没有正向目标，添加一个来强化自己！</div>
                 </div>
             </div>
-        </div>
 
-        <!-- 主动激励模块 -->
-        <div class="section">
-            <div class="section-title">
-                <span>💪 主动激励中心</span>
-                <span style="font-size:0.8em;color:#aaa;">快要坚持不住时，来这里充能</span>
-            </div>
-            <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">点击对应按钮，获取燃向激励短视频，重燃斗志！（后续将接入真实短视频素材库）</p>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;">
-                <button class="btn btn-primary" onclick="triggerMotivation('noFap')" style="background:linear-gradient(135deg, #e94560, #c0392b);">
-                    🛡️ 戒色激励
-                </button>
-                <button class="btn btn-primary" onclick="triggerMotivation('focus')" style="background:linear-gradient(135deg, #3498db, #2980b9);">
-                    🎯 专注力激励
-                </button>
-                <button class="btn btn-primary" onclick="triggerMotivation('power')" style="background:linear-gradient(135deg, #f39c12, #d35400);">
-                    ⚡ 动力激励
-                </button>
-                <button class="btn btn-primary" onclick="triggerMotivation('letgo')" style="background:linear-gradient(135deg, #9b59b6, #8e44ad);">
-                    🍃 放下激励
-                </button>
+            <!-- 积分兑换中心 -->
+            <div class="section compact">
+                <div class="section-title">
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #f59e0b, #fbbf24);">🪙</span>积分兑换中心</span>
+                    <span style="font-size:0.8em;color:#9ca3af;">累计 <b id="pointTotalBadge">0</b> 积分</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="rewardNameInput" placeholder="奖励名称（如：看一部电影）">
+                    <input type="number" id="rewardCostInput" placeholder="所需积分" value="50" min="1">
+                    <button class="btn btn-success" onclick="addPointReward()">添加奖励</button>
+                </div>
+                <div class="point-reward-list" id="pointRewardList">
+                    <div class="empty-state">还没有兑换项目，添加一个来激励自己吧！</div>
+                </div>
             </div>
         </div>
 
         <!-- 激励视频库 -->
-        <div class="section collapsible">
+        <div class="section collapsible" style="border:2px solid #d1d5db;">
             <div class="section-title" onclick="toggleSection(this)">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <span>🎬 激励视频库</span>
-                    <span style="font-size:0.8em;color:#aaa;">管理 YouTube 激励视频</span>
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #8b5cf6, #a78bfa);">🎬</span>激励视频库</span>
+                    <span style="font-size:0.8em;color:#9ca3af;">管理 YouTube 激励视频</span>
                 </div>
                 <button class="toggle-btn" aria-label="展开/收起">▶</button>
             </div>
@@ -720,11 +1030,11 @@
         </div>
 
         <!-- 本地语音激励库 -->
-        <div class="section collapsible">
+        <div class="section collapsible" style="border:2px solid #d1d5db;">
             <div class="section-title" onclick="toggleSection(this)">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <span>🎙️ 本地语音激励库</span>
-                    <span style="font-size:0.8em;color:#aaa;">上传本地音频或视频（视频会自动提取为音频）</span>
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #ec4899, #f472b6);">🎙️</span>本地语音激励库</span>
+                    <span style="font-size:0.8em;color:#9ca3af;">上传本地音频或视频（视频会自动提取为音频）</span>
                 </div>
                 <button class="toggle-btn" aria-label="展开/收起">▶</button>
             </div>
@@ -737,7 +1047,7 @@
                         <option value="power">动力激励</option>
                         <option value="letgo">放下激励</option>
                     </select>
-                    <input type="file" id="audioFileInput" accept="audio/*,video/*" style="border-radius:10px;color:#fff;">
+                    <input type="file" id="audioFileInput" accept="audio/*,video/*" style="border-radius:10px;color:#1f2937;">
                     <button class="btn btn-success" id="audioUploadBtn" onclick="addLocalAudio()">上传媒体</button>
                 </div>
                 <div class="audio-list" id="audioList">
@@ -747,8 +1057,68 @@
         </div>
 
         <!-- 数据可视化 -->
-        <div class="section compact">
-            <div class="section-title">📊 成长数据可视化</div>
+        <div class="section compact" style="border:2px solid #d1d5db;">
+            <div class="section-title"><span class="icon-badge" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">📊</span>成长数据可视化</div>
+            <div class="plant-container" id="plantContainer">
+                <svg class="plant-bg" viewBox="0 0 400 280" preserveAspectRatio="xMidYMax slice">
+                    <defs>
+                        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#0f172a"/>
+                            <stop offset="40%" stop-color="#1e1b4b"/>
+                            <stop offset="100%" stop-color="#312e81"/>
+                        </linearGradient>
+                        <linearGradient id="mfar" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#312e81"/>
+                            <stop offset="100%" stop-color="#1e1b4b"/>
+                        </linearGradient>
+                        <linearGradient id="mnear" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#4338ca"/>
+                            <stop offset="100%" stop-color="#312e81"/>
+                        </linearGradient>
+                        <linearGradient id="mpeak" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#5b21b6"/>
+                            <stop offset="100%" stop-color="#4c1d95"/>
+                        </linearGradient>
+                        <linearGradient id="cloudG" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="rgba(139,92,246,0)"/>
+                            <stop offset="100%" stop-color="rgba(139,92,246,0.25)"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="400" height="280" fill="url(#skyGrad)"/>
+                    <circle cx="30" cy="25" r="1" fill="#fff" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="70" cy="45" r="0.8" fill="#fff" opacity="0.3"><animate attributeName="opacity" values="0.3;0.08;0.3" dur="4s" repeatCount="indefinite"/></circle>
+                    <circle cx="120" cy="20" r="1.2" fill="#fbbf24" opacity="0.25"><animate attributeName="opacity" values="0.25;0.05;0.25" dur="2.5s" repeatCount="indefinite"/></circle>
+                    <circle cx="160" cy="55" r="0.8" fill="#fff" opacity="0.35"><animate attributeName="opacity" values="0.35;0.1;0.35" dur="3.5s" repeatCount="indefinite"/></circle>
+                    <circle cx="200" cy="30" r="1" fill="#fff" opacity="0.3"><animate attributeName="opacity" values="0.3;0.08;0.3" dur="2s" repeatCount="indefinite"/></circle>
+                    <circle cx="260" cy="50" r="0.8" fill="#a78bfa" opacity="0.3"><animate attributeName="opacity" values="0.3;0.08;0.3" dur="4.5s" repeatCount="indefinite"/></circle>
+                    <circle cx="300" cy="25" r="1.2" fill="#fff" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="350" cy="60" r="0.8" fill="#fbbf24" opacity="0.25"><animate attributeName="opacity" values="0.25;0.05;0.25" dur="2.8s" repeatCount="indefinite"/></circle>
+                    <circle cx="380" cy="35" r="1" fill="#fff" opacity="0.3"><animate attributeName="opacity" values="0.3;0.08;0.3" dur="3.2s" repeatCount="indefinite"/></circle>
+
+                    <circle cx="340" cy="35" r="22" fill="rgba(251,191,36,0.1)"/>
+                    <circle cx="340" cy="35" r="15" fill="rgba(251,191,36,0.06)"/>
+
+                    <path d="M-20,200 L40,125 L100,175 L160,105 L230,165 L300,95 L380,155 L420,190 L420,280 L-20,280Z" fill="url(#mfar)" opacity="0.45"/>
+
+                    <path d="M-20,280 L20,205 L80,255 L140,185 L200,235 L260,165 L320,225 L380,195 L420,210 L420,280 L-20,280Z" fill="url(#mnear)" opacity="0.55"/>
+
+                    <path d="M130,280 L200,125 L270,280Z" fill="url(#mpeak)" opacity="0.5"/>
+                    <path d="M200,160 L198,200 L202,220 L199,260" stroke="rgba(147,197,253,0.3)" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+
+                    <path d="M-20,280 L0,235 L50,270 L100,220 L150,260 L200,200 L250,250 L300,210 L350,250 L420,230 L420,280Z" fill="#312e81" opacity="0.35"/>
+
+                    <rect x="0" y="245" width="400" height="35" fill="url(#cloudG)"/>
+                    <ellipse cx="80" cy="255" rx="60" ry="10" fill="rgba(139,92,246,0.12)"/>
+                    <ellipse cx="200" cy="260" rx="50" ry="8" fill="rgba(139,92,246,0.1)"/>
+                    <ellipse cx="320" cy="252" rx="70" ry="12" fill="rgba(139,92,246,0.14)"/>
+
+                    <ellipse cx="100" cy="220" rx="40" ry="12" fill="rgba(34,211,238,0.08)"/>
+                    <ellipse cx="300" cy="210" rx="35" ry="10" fill="rgba(139,92,246,0.08)"/>
+                </svg>
+                <div class="plant-stage" id="plantStage" onclick="openPlantPreview()">Lv.1 种子</div>
+                <div class="plant-svg-wrap" id="plantSvgWrap"></div>
+                <div class="plant-status" id="plantStatus"></div>
+            </div>
             <div class="charts-grid">
                 <div class="chart-container">
                     <canvas id="checkinChart"></canvas>
@@ -764,10 +1134,9 @@
 
         <div class="compact-grid">
             <!-- 失败案例库 -->
-            <div class="section compact">
+            <div class="section compact" style="background:#fffbeb;border:2px solid #d1d5db;">
                 <div class="section-title">
-                    <span>💀 失败案例库</span>
-                    <span id="debuffSummary" style="font-size:0.8em;color:#e74c3c;"></span>
+                    <span><span class="icon-badge" style="background:linear-gradient(135deg, #6b7280, #9ca3af);">💀</span>失败案例库</span>
                 </div>
                 <div class="failure-list" id="failureList">
                     <div class="empty-state">还没有失败记录，继续保持！</div>
@@ -775,22 +1144,22 @@
             </div>
 
             <!-- 手动反思按钮 -->
-            <div class="section compact" style="text-align:center;">
-                <button class="btn btn-warning" onclick="showReflection()">📝 手动反思总结</button>
-                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">系统也会每 4 小时自动提醒你反思一次</p>
+            <div class="section compact" style="text-align:center;background:#fffbeb;border:2px solid #d1d5db;">
+                <button class="btn btn-warning" onclick="showReflection()"><span class="icon-badge" style="width:26px;height:26px;border-radius:6px;font-size:0.9em;margin-right:6px;background:linear-gradient(135deg, #f59e0b, #fbbf24);">📝</span>手动反思总结</button>
+                <p style="color:#78716c;font-size:0.95em;margin-top:10px;">系统也会每 4 小时自动提醒你反思一次</p>
             </div>
 
             <!-- 数据同步 -->
-            <div class="section compact" style="text-align:center;">
-                <button class="btn btn-primary" onclick="openSyncModal()">🔄 数据同步</button>
-                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
+            <div class="section compact" style="text-align:center;background:#fffbeb;border:2px solid #d1d5db;">
+                <button class="btn btn-primary" onclick="openSyncModal()"><span class="icon-badge" style="width:26px;height:26px;border-radius:6px;font-size:0.9em;margin-right:6px;background:linear-gradient(135deg, #3b82f6, #60a5fa);">🔄</span>数据同步</button>
+                <p style="color:#78716c;font-size:0.95em;margin-top:10px;">导出二维码/JSON，在另一台设备上导入</p>
             </div>
 
             <!-- 存储诊断 -->
-            <div class="section compact" style="text-align:center;">
-                <button class="btn btn-warning" onclick="runStorageDiagnostics()">🔍 诊断存储状态</button>
-                <p style="color:#aaa;font-size:0.85em;margin-top:10px;">检测 IndexedDB 音频是否完整，帮助排查同步问题</p>
-                <div id="diagResult" style="margin-top:15px;text-align:left;font-size:0.85em;display:none;"></div>
+            <div class="section compact" style="text-align:center;background:#fffbeb;border:2px solid #d1d5db;">
+                <button class="btn btn-warning" onclick="runStorageDiagnostics()"><span class="icon-badge" style="width:26px;height:26px;border-radius:6px;font-size:0.9em;margin-right:6px;background:linear-gradient(135deg, #6b7280, #9ca3af);">🔍</span>诊断存储状态</button>
+                <p style="color:#78716c;font-size:0.95em;margin-top:10px;">检测 IndexedDB 音频是否完整，帮助排查同步问题</p>
+                <div id="diagResult" style="margin-top:15px;text-align:left;font-size:0.95em;display:none;"></div>
             </div>
         </div>
     </div>
@@ -807,7 +1176,7 @@
             <!-- 视频加载提示/备用 -->
             <div id="videoLoadOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;text-align:center;padding:20px;z-index:5;">
                 <div style="font-size:1.5em;margin-bottom:15px;">📡 视频加载中...</div>
-                <div style="color:#aaa;margin-bottom:20px;max-width:80%;">
+                <div style="color:#9ca3af;margin-bottom:20px;max-width:80%;">
                     如果长时间黑屏，说明当前网络无法访问 YouTube。
                 </div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
@@ -866,7 +1235,7 @@
         <div class="sync-content">
             <div class="section-title" style="border-bottom-color:#3498db;margin-bottom:20px;">
                 <span>🔄 数据同步</span>
-                <button class="btn btn-small" onclick="closeSyncModal()" style="background:rgba(255,255,255,0.1);color:#fff;">关闭</button>
+                <button class="btn btn-small" onclick="closeSyncModal()" style="background:#f3f4f6;color:#374151;">关闭</button>
             </div>
             <div class="sync-tabs">
                 <button class="sync-tab active" data-tab="export" onclick="switchSyncTab('export', this)">📤 导出数据</button>
@@ -874,14 +1243,14 @@
             </div>
 
             <div class="sync-panel active" id="syncExportPanel">
-                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">
+                <p style="color:#9ca3af;margin-bottom:15px;font-size:0.9em;">
                     <b>JSON 文本 / 下载文件</b>：包含完整数据（含音频），推荐用于手机同步。<br>
                     <b>二维码</b>：因容量限制不含音频文件，仅同步习惯/目标等数据。
                 </p>
                 <div style="text-align:center;">
                     <div class="qr-wrap" id="qrcode"></div>
                 </div>
-                <div id="exportAudioStats" style="color:#f39c12;font-size:0.85em;margin-bottom:10px;"></div>
+                <div id="exportAudioStats" style="color:#f39c12;font-size:0.95em;margin-bottom:10px;"></div>
                 <textarea class="sync-textarea" id="exportJson" readonly></textarea>
                 <div class="sync-actions">
                     <button class="btn btn-success" onclick="copyExportJson()">📋 复制 JSON</button>
@@ -890,8 +1259,8 @@
             </div>
 
             <div class="sync-panel" id="syncImportPanel">
-                <p style="color:#aaa;margin-bottom:15px;font-size:0.9em;">粘贴 JSON 文本导入，或点击下方按钮扫码。</p>
-                <div id="importFileStats" style="color:#f39c12;font-size:0.85em;margin-bottom:10px;display:none;"></div>
+                <p style="color:#9ca3af;margin-bottom:15px;font-size:0.9em;">粘贴 JSON 文本导入，或点击下方按钮扫码。</p>
+                <div id="importFileStats" style="color:#f39c12;font-size:0.95em;margin-bottom:10px;display:none;"></div>
                 <textarea class="sync-textarea" id="importJson" placeholder="将导出的 JSON 文本粘贴到这里..."></textarea>
                 <div class="sync-actions">
                     <button class="btn btn-success" onclick="importFromText()">📋 导入文本</button>
@@ -902,6 +1271,51 @@
                 <div class="sync-actions" style="margin-top:10px;">
                     <button class="btn btn-warning" onclick="document.getElementById('jsonFileInput').click()">📁 从文件导入</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="delete-modal" id="deleteModal">
+        <div class="delete-content">
+            <div class="delete-title">🗑️ 确认删除</div>
+            <p id="deleteModalText">你确定要删除这个项目吗？此操作不可撤销。</p>
+            <input type="text" class="delete-input" id="deleteConfirmInput" placeholder="请输入：我确定要删除该项目">
+            <div class="delete-actions">
+                <button class="btn btn-small" onclick="closeDeleteModal()" style="background:#f3f4f6;color:#374151;">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 植物成长预览弹窗 -->
+    <div class="plant-preview-modal" id="plantPreviewModal">
+        <div class="plant-preview-content">
+            <div class="plant-preview-title">🌱 植物成长预览</div>
+            <div class="plant-preview-grid" id="plantPreviewGrid"></div>
+            <div class="plant-preview-actions">
+                <button class="btn btn-small" onclick="closePlantPreview()" style="background:#f3f4f6;color:#374151;">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- XP 详情弹窗 -->
+    <div class="plant-preview-modal" id="xpDetailModal">
+        <div class="plant-preview-content" style="max-width:420px;">
+            <div class="plant-preview-title">📊 XP 详情</div>
+            <div id="xpDetailContent" style="text-align:center;margin-bottom:20px;">
+                <div style="font-size:1.1em;color:#374151;margin-bottom:8px;">当前等级：<b id="xpDetailLevel" style="color:#e94560;">1</b></div>
+                <div style="font-size:1em;color:#6b7280;margin-bottom:8px;">当前 XP：<b id="xpDetailCurrent">0</b></div>
+                <div style="font-size:0.95em;color:#6b7280;margin-bottom:6px;">下一级需要：<b id="xpDetailNextTotal">0</b> XP</div>
+                <div style="font-size:1em;color:#10b981;margin-bottom:10px;">距离下一级还需：<b id="xpDetailToNext">0</b> XP</div>
+                <div style="height:1px;background:#e5e7eb;margin:12px 0;"></div>
+                <div style="font-size:0.9em;color:#6b7280;margin-bottom:6px;">满级（Lv.50）需要：<b id="xpDetailMaxTotal">0</b> XP</div>
+                <div style="font-size:1em;color:#f59e0b;margin-bottom:10px;">距离满级还需：<b id="xpDetailToMax">0</b> XP</div>
+                <div class="progress-bar" style="margin-top:10px;"><div class="progress-fill" id="xpDetailBar" style="width:0%"></div></div>
+                <div style="font-size:0.8em;color:#9ca3af;margin-top:6px;">总进度：<span id="xpDetailPercent">0%</span></div>
+            </div>
+            <div class="plant-preview-actions">
+                <button class="btn btn-small" onclick="closeXpDetail()" style="background:#f3f4f6;color:#374151;">关闭</button>
             </div>
         </div>
     </div>
@@ -922,11 +1336,17 @@
             checkinHistory: {},
             xpHistory: {},
             lastReflectionTime: null,
-            rewardsUnlocked: []
+            rewardsUnlocked: [],
+            points: 0,
+            pointRewards: [],
+            pointHistory: []
         };
         // 兼容旧数据：补全新增字段
         if (!data.motivationVideos) data.motivationVideos = [];
         if (!data.localAudios) data.localAudios = [];
+        if (typeof data.points !== 'number') data.points = 0;
+        if (!data.pointRewards) data.pointRewards = [];
+        if (!data.pointHistory) data.pointHistory = [];
 
         const tiers = [
             { name: '青铜', minLv: 1, color: 'tier-bronze' },
@@ -1042,8 +1462,10 @@
         function renderAll() {
             renderStats();
             renderBodyStats();
+            renderPlant();
             renderHabits();
             renderGoals();
+            renderPointRewards();
             renderFailures();
             renderMotivationVideos();
             renderLocalAudios();
@@ -1054,6 +1476,7 @@
             document.getElementById('levelDisplay').textContent = data.level;
             document.getElementById('totalXPDisplay').textContent = data.xp;
             document.getElementById('streakDisplay').textContent = data.streak;
+            document.getElementById('pointsDisplay').textContent = data.points;
 
             const tier = tiers.slice().reverse().find(t => data.level >= t.minLv) || tiers[0];
             const tierEl = document.getElementById('tierDisplay');
@@ -1067,7 +1490,8 @@
         }
 
         function getXpForLevel(lv) {
-            return Math.floor(100 * Math.pow(1.5, lv - 1));
+            // 每级区间 XP = 80 * 1.04^x，累积为等比数列求和
+            return Math.floor(2080 * (Math.pow(1.04, lv) - 1));
         }
 
         function renderBodyStats() {
@@ -1076,6 +1500,369 @@
                 const val = Math.max(0, Math.min(100, Math.round(data.stats[stat])));
                 document.getElementById(stat + 'Val').textContent = val;
             });
+        }
+
+        // ========== 植物养成 ==========
+        function renderPlant() {
+            const lv = Math.max(1, Math.min(50, data.level || 1));
+            const stats = ['focus','brain','hormone','energy'].map(s => data.stats[s] || 50);
+            const minStat = Math.min(...stats);
+            const allHigh = stats.every(s => s >= 70);
+
+            const stageNames = [
+                '种子萌芽', '嫩叶初展', '幼苗破土', '茎干拔节', '新叶舒展',
+                '枝叶扶疏', '青翠欲滴', '亭亭玉立', '茁壮成长', '生机盎然',
+                '小树成林', '枝繁叶茂', '郁郁葱葱', '碧叶连天', '茂林修竹',
+                '绿叶成荫', '繁花初绽', '蓓蕾含苞', '花团锦簇', '姹紫嫣红',
+                '百花齐放', '争奇斗艳', '花明柳媚', '桃李争春', '芬芳馥郁',
+                '落英缤纷', '硕果累累', '春华秋实', '果实累累', '丰收在望',
+                '金玉满堂', '璀璨生辉', '仙姿玉貌', '灵光闪现', '瑞气千条',
+                '灵光普照', '神木参天', '万古长青', '天地灵根', '混沌青莲'
+            ];
+            const stageIndex = Math.min(stageNames.length - 1, Math.floor((lv - 1) / 1.25));
+            document.getElementById('plantStage').textContent = 'Lv.' + lv + ' ' + stageNames[stageIndex];
+
+            const wrap = document.getElementById('plantSvgWrap');
+            wrap.innerHTML = buildPlantSVG(lv);
+
+            // 身体指标影响植物状态
+            wrap.className = 'plant-svg-wrap';
+            let statusText = '';
+            if (allHigh) {
+                wrap.classList.add('plant-glow');
+                statusText = '✨ 状态极佳';
+            } else if (minStat < 30) {
+                wrap.classList.add('plant-very-dim');
+                statusText = '💀 状态危急';
+            } else if (minStat < 50) {
+                wrap.classList.add('plant-dim');
+                statusText = '😰 状态不佳';
+            } else {
+                statusText = '🌿 状态良好';
+            }
+            document.getElementById('plantStatus').textContent = statusText;
+        }
+
+        function openPlantPreview() {
+            const grid = document.getElementById('plantPreviewGrid');
+            const levels = [10, 20, 30, 40, 50];
+            const stageNames = [
+                '种子萌芽', '嫩叶初展', '幼苗破土', '茎干拔节', '新叶舒展',
+                '枝叶扶疏', '青翠欲滴', '亭亭玉立', '茁壮成长', '生机盎然',
+                '小树成林', '枝繁叶茂', '郁郁葱葱', '碧叶连天', '茂林修竹',
+                '绿叶成荫', '繁花初绽', '蓓蕾含苞', '花团锦簇', '姹紫嫣红',
+                '百花齐放', '争奇斗艳', '花明柳媚', '桃李争春', '芬芳馥郁',
+                '落英缤纷', '硕果累累', '春华秋实', '果实累累', '丰收在望',
+                '金玉满堂', '璀璨生辉', '仙姿玉貌', '灵光闪现', '瑞气千条',
+                '灵光普照', '神木参天', '万古长青', '天地灵根', '混沌青莲'
+            ];
+            grid.innerHTML = levels.map(lv => {
+                const stageIndex = Math.min(stageNames.length - 1, Math.floor((lv - 1) / 1.25));
+                return `
+                    <div class="plant-preview-item">
+                        <div class="preview-lv">Lv.${lv}</div>
+                        ${buildPlantSVG(lv)}
+                        <div class="preview-name">${stageNames[stageIndex]}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('plantPreviewModal').style.display = 'flex';
+        }
+
+        function closePlantPreview() {
+            document.getElementById('plantPreviewModal').style.display = 'none';
+        }
+
+        function openXpDetail() {
+            const lv = data.level || 1;
+            const currentXP = data.xp || 0;
+            const nextLevelXP = getXpForLevel(lv + 1);
+            const toNext = Math.max(0, nextLevelXP - currentXP);
+            const maxLevelXP = getXpForLevel(50);
+            const toMax = Math.max(0, maxLevelXP - currentXP);
+            const percent = Math.min(100, Math.max(0, (currentXP / maxLevelXP) * 100));
+
+            document.getElementById('xpDetailLevel').textContent = lv;
+            document.getElementById('xpDetailCurrent').textContent = currentXP.toLocaleString();
+            document.getElementById('xpDetailNextTotal').textContent = nextLevelXP.toLocaleString();
+            document.getElementById('xpDetailToNext').textContent = toNext.toLocaleString();
+            document.getElementById('xpDetailMaxTotal').textContent = maxLevelXP.toLocaleString();
+            document.getElementById('xpDetailToMax').textContent = toMax.toLocaleString();
+            document.getElementById('xpDetailBar').style.width = percent + '%';
+            document.getElementById('xpDetailPercent').textContent = percent.toFixed(1) + '%';
+            document.getElementById('xpDetailModal').style.display = 'flex';
+        }
+
+        function closeXpDetail() {
+            document.getElementById('xpDetailModal').style.display = 'none';
+        }
+
+        function buildPlantSVG(level) {
+            const stemH = 26 + level * 2.8;
+            const maxLeaf = Math.min(18, Math.floor(level / 2.8) + 1);
+            const hasFlower = level >= 16;
+            const flowerCount = hasFlower ? Math.min(8, Math.floor((level - 12) / 4.5) + 1) : 0;
+            const hasFruit = level >= 30;
+            const fruitCount = hasFruit ? Math.min(7, Math.floor((level - 26) / 3.5) + 1) : 0;
+            const hasHalo = level >= 38;
+            const hasDragon = level >= 45;
+            const hasLightning = level >= 48;
+            const scale = 0.30 + (level / 50) * 0.90;
+
+            // ===== 星辰背景 =====
+            let stars = '';
+            for (let i = 0; i < 20; i++) {
+                const sx = 20 + (i * 37) % 160;
+                const sy = 10 + (i * 53) % 100;
+                const sr = 0.5 + (i % 3) * 0.4;
+                const so = 0.15 + (i % 7) * 0.08;
+                stars += `<circle cx="${sx}" cy="${sy}" r="${sr}" fill="#fff" opacity="${so}"><animate attributeName="opacity" values="${so};${so*0.3};${so}" dur="${3+i%4}s" repeatCount="indefinite"/></circle>`;
+            }
+
+            // ===== 灵气粒子 =====
+            let particles = '';
+            const pCount = Math.floor(level / 4) + 4;
+            for (let i = 0; i < pCount; i++) {
+                const px = 50 + (i * 61) % 100;
+                const py = 30 + (i * 37) % 100;
+                const pr = 1.2 + (i % 4) * 0.7;
+                const pop = 0.5 + (i % 5) * 0.1;
+                const pColor = i % 3 === 0 ? '#fbbf24' : (i % 3 === 1 ? '#22d3ee' : '#c084fc');
+                particles += `<circle cx="${px}" cy="${py}" r="${pr}" fill="${pColor}" opacity="${pop}"><animate attributeName="opacity" values="${pop};${pop*0.2};${pop}" dur="${1.5+i%3}s" repeatCount="indefinite"/><animate attributeName="cy" values="${py};${py-8};${py}" dur="${2+i%3}s" repeatCount="indefinite"/></circle>`;
+            }
+
+            // ===== 祥云底座 =====
+            const cloudY = 175;
+            let cloud = '';
+            const cloudColors = ['#6366f1', '#8b5cf6', '#a78bfa'];
+            cloud += `<ellipse cx="65" cy="${cloudY}" rx="28" ry="10" fill="url(#cloudGrad1)" opacity="0.5"/>`;
+            cloud += `<ellipse cx="100" cy="${cloudY-4}" rx="34" ry="12" fill="url(#cloudGrad2)" opacity="0.6"/>`;
+            cloud += `<ellipse cx="135" cy="${cloudY}" rx="28" ry="10" fill="url(#cloudGrad1)" opacity="0.5"/>`;
+            cloud += `<ellipse cx="80" cy="${cloudY-8}" rx="20" ry="7" fill="url(#cloudGrad3)" opacity="0.4"/>`;
+            cloud += `<ellipse cx="118" cy="${cloudY-7}" rx="22" ry="8" fill="url(#cloudGrad3)" opacity="0.4"/>`;
+            cloud += `<ellipse cx="100" cy="${cloudY-2}" rx="45" ry="14" fill="url(#glowBase)" opacity="${Math.min(0.35, level/120)}"/>`;
+
+            // ===== 龙鳞灵根主干 =====
+            const trunkW = 4 + level / 8;
+            const curve1 = 100 + Math.sin(level * 1.3) * 14;
+            const curve2 = 100 + Math.cos(level * 0.9) * 10;
+            let trunk = '';
+            // 主根 - 双层描边效果
+            trunk += `<path d="M100,175 Q${curve1},${175 - stemH/3} ${curve2},${175 - stemH*0.65} Q100,${175 - stemH*0.85} 100,${175 - stemH}" stroke="${level >= 35 ? '#f59e0b' : '#0891b2'}" stroke-width="${trunkW + 2}" fill="none" stroke-linecap="round" opacity="0.4"/>`;
+            trunk += `<path d="M100,175 Q${curve1},${175 - stemH/3} ${curve2},${175 - stemH*0.65} Q100,${175 - stemH*0.85} 100,${175 - stemH}" stroke="url(#trunkGrad)" stroke-width="${trunkW}" fill="none" stroke-linecap="round"/>`;
+            // 龙鳞纹理
+            const scaleCount = Math.floor(stemH / 10);
+            for (let i = 0; i < scaleCount; i++) {
+                const sy = 175 - 12 - i * 10;
+                const sx = 100 + Math.sin(i * 1.5) * 3;
+                trunk += `<ellipse cx="${sx}" cy="${sy}" rx="${trunkW*0.35}" ry="${trunkW*0.25}" fill="${level >= 30 ? '#fcd34d' : '#67e8f9'}" opacity="0.5"/>`;
+            }
+
+            // ===== 分叉灵枝 =====
+            if (level >= 12) {
+                const branches = Math.min(5, Math.floor((level - 8) / 7) + 1);
+                for (let i = 0; i < branches; i++) {
+                    const side = i % 2 === 0 ? -1 : 1;
+                    const by = 175 - stemH * (0.4 + i * 0.1);
+                    const bx1 = 100 + side * 10;
+                    const bx2 = 100 + side * (26 + i * 8);
+                    const by2 = by - (14 + i * 5);
+                    trunk += `<path d="M${100 + side * 4},${by} Q${bx1},${by-8} ${bx2},${by2}" stroke="${level >= 35 ? '#f59e0b' : '#0891b2'}" stroke-width="${trunkW * 0.55 + 1.5}" fill="none" stroke-linecap="round" opacity="0.35"/>`;
+                    trunk += `<path d="M${100 + side * 4},${by} Q${bx1},${by-8} ${bx2},${by2}" stroke="url(#trunkGrad)" stroke-width="${trunkW * 0.55}" fill="none" stroke-linecap="round"/>`;
+                }
+            }
+
+            // ===== 凤凰羽仙叶 =====
+            let leaves = '';
+            const leafPalette = level >= 33
+                ? ['#fbbf24', '#f59e0b', '#fcd34d', '#fde68a', '#fff7ed']
+                : level >= 18
+                    ? ['#c084fc', '#a78bfa', '#8b5cf6', '#ddd6fe', '#e9d5ff']
+                    : ['#22d3ee', '#06b6d4', '#67e8f9', '#0891b2', '#cffafe'];
+            for (let i = 0; i < maxLeaf; i++) {
+                const side = i % 2 === 0 ? -1 : 1;
+                const y = 175 - (stemH * (i + 1) / (maxLeaf + 1.5));
+                const x = 100 + side * (12 + (i % 3) * 8);
+                const rot = side * (35 + (i % 4) * 18);
+                const color = leafPalette[i % leafPalette.length];
+                const glowColor = level >= 28 ? '#fbbf24' : '#22d3ee';
+                // 凤凰羽形 - 更飘逸尖锐
+                const tipX = x + side * 26;
+                const tipY = y - 16;
+                leaves += `<path d="M${x},${y} Q${x + side*8},${y-2} ${tipX},${tipY} Q${x + side*14},${y-1} ${x + side*6},${y+4} Z" fill="${color}" opacity="0.92" transform="rotate(${rot},${x},${y})"/>`;
+                leaves += `<path d="M${x},${y} Q${x + side*8},${y-2} ${tipX},${tipY}" stroke="${glowColor}" stroke-width="1" fill="none" opacity="0.7" transform="rotate(${rot},${x},${y})"/>`;
+                // 叶脉
+                leaves += `<path d="M${x},${y} Q${x + side*10},${y-4} ${tipX- side*3},${tipY+3}" stroke="${glowColor}" stroke-width="0.5" fill="none" opacity="0.4" transform="rotate(${rot},${x},${y})"/>`;
+            }
+
+            // ===== 九瓣道莲 =====
+            let flowers = '';
+            for (let i = 0; i < flowerCount; i++) {
+                const angle = (i / Math.max(1, flowerCount)) * Math.PI * 2 - Math.PI / 2;
+                const fx = 100 + Math.cos(angle) * (12 + level/5);
+                const fy = 175 - stemH - 10 + Math.sin(angle) * 10;
+                const fColors = level >= 38 ? ['#fbbf24', '#f59e0b', '#fcd34d', '#fef08a'] : ['#c084fc', '#a78bfa', '#8b5cf6', '#e9d5ff'];
+                // 九瓣莲花
+                for (let l = 0; l < 4; l++) {
+                    const lr = 6 + l * 2;
+                    const ly = fy - l * 1.2;
+                    const petals = 5 + l;
+                    for (let p = 0; p < petals; p++) {
+                        const pa = (p / petals) * Math.PI * 2;
+                        const ppx = fx + Math.cos(pa) * lr * 0.6;
+                        const ppy = ly + Math.sin(pa) * lr * 0.3;
+                        flowers += `<ellipse cx="${ppx}" cy="${ppy}" rx="${3.5+l*0.5}" ry="${2+l*0.3}" fill="${fColors[l % fColors.length]}" opacity="${0.9 - l*0.15}" transform="rotate(${pa*180/Math.PI + 90},${ppx},${ppy})"/>`;
+                    }
+                }
+                flowers += `<circle cx="${fx}" cy="${fy-1}" r="4" fill="#fef08a" opacity="0.95"/>`;
+                flowers += `<circle cx="${fx}" cy="${fy-1}" r="2" fill="#f59e0b" opacity="0.8"/>`;
+                if (level >= 28) {
+                    flowers += `<circle cx="${fx}" cy="${fy-1}" r="14" fill="url(#topGlow)" opacity="0.2"/>`;
+                }
+            }
+
+            // ===== 金丹灵果 =====
+            let fruits = '';
+            for (let i = 0; i < fruitCount; i++) {
+                const fy = 175 - stemH * 0.28 - (i % 5) * 14;
+                const fx = 100 + (i % 2 === 0 ? 1 : -1) * (14 + (i % 3) * 7);
+                // 宝珠主体
+                fruits += `<circle cx="${fx}" cy="${fy}" r="6.5" fill="url(#fruitGrad)"/>`;
+                fruits += `<circle cx="${fx-2}" cy="${fy-2}" r="2.2" fill="#fff" opacity="0.6"/>`;
+                fruits += `<circle cx="${fx}" cy="${fy}" r="3" fill="url(#fruitGrad)" opacity="0.5"/>`;
+                // 灵气环 - 双层旋转
+                if (level >= 35) {
+                    fruits += `<ellipse cx="${fx}" cy="${fy}" rx="11" ry="4" fill="none" stroke="#fbbf24" stroke-width="0.7" opacity="0.5"><animateTransform attributeName="transform" type="rotate" from="0 ${fx} ${fy}" to="360 ${fx} ${fy}" dur="${3+i%2}s" repeatCount="indefinite"/></ellipse>`;
+                    fruits += `<ellipse cx="${fx}" cy="${fy}" rx="4" ry="11" fill="none" stroke="#c084fc" stroke-width="0.5" opacity="0.35"><animateTransform attributeName="transform" type="rotate" from="0 ${fx} ${fy}" to="-360 ${fx} ${fy}" dur="${4+i%2}s" repeatCount="indefinite"/></ellipse>`;
+                }
+            }
+
+            // ===== 多层符文光环 =====
+            let halo = '';
+            if (hasHalo) {
+                const cy = 175 - stemH * 0.5;
+                const rings = Math.min(3, Math.floor((level - 35) / 4) + 1);
+                for (let r = 0; r < rings; r++) {
+                    const hr = 40 + r * 14 + (level - 38) * 1.2;
+                    halo += `<circle cx="100" cy="${cy}" r="${hr}" fill="none" stroke="url(#haloGrad)" stroke-width="${1.5 - r*0.3}" opacity="${0.4 - r*0.1}"><animateTransform attributeName="transform" type="rotate" from="${r%2===0?0:360} 100 ${cy}" to="${r%2===0?360:0} 100 ${cy}" dur="${6+r*2}s" repeatCount="indefinite"/></circle>`;
+                }
+                // 符文星点
+                const runeCount = 6 + rings * 2;
+                for (let i = 0; i < runeCount; i++) {
+                    const ha = (i / runeCount) * Math.PI * 2;
+                    const hx = 100 + Math.cos(ha) * (50 + rings * 10);
+                    const hy = cy + Math.sin(ha) * (50 + rings * 10) * 0.4;
+                    halo += `<polygon points="${hx},${hy-3} ${hx+2.5},${hy} ${hx},${hy+3} ${hx-2.5},${hy}" fill="#fbbf24" opacity="0.6"><animateTransform attributeName="transform" type="rotate" from="0 ${hx} ${hy}" to="360 ${hx} ${hy}" dur="${3+i%3}s" repeatCount="indefinite"/></polygon>`;
+                }
+            }
+
+            // ===== 龙形虚影 =====
+            let dragon = '';
+            if (hasDragon) {
+                const dy = 175 - stemH * 0.3;
+                dragon += `<path d="M40,${dy-20} Q55,${dy-45} 80,${dy-35} Q65,${dy-25} 55,${dy-15} Q70,${dy-5} 60,${dy+10} Q45,${dy} 40,${dy-20}" fill="none" stroke="#fbbf24" stroke-width="1.2" opacity="0.25"/>`;
+                dragon += `<path d="M160,${dy-25} Q145,${dy-50} 120,${dy-40} Q135,${dy-30} 145,${dy-20} Q130,${dy-10} 140,${dy+5} Q155,${dy-5} 160,${dy-25}" fill="none" stroke="#fbbf24" stroke-width="1.2" opacity="0.25"/>`;
+                // 龙眼
+                dragon += `<circle cx="75" cy="${dy-38}" r="1.5" fill="#fbbf24" opacity="0.5"><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/></circle>`;
+                dragon += `<circle cx="125" cy="${dy-43}" r="1.5" fill="#fbbf24" opacity="0.5"><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.3s" repeatCount="indefinite"/></circle>`;
+            }
+
+            // ===== 雷霆闪电 =====
+            let lightning = '';
+            if (hasLightning) {
+                const lx = [30, 170, 50, 150];
+                const ly = [40, 50, 80, 70];
+                for (let i = 0; i < 3; i++) {
+                    lightning += `<polyline points="${lx[i]},${ly[i]} ${lx[i]+8},${ly[i]+15} ${lx[i]-2},${ly[i]+25} ${lx[i]+10},${ly[i]+40}" fill="none" stroke="#fde047" stroke-width="1.5" opacity="0"><animate attributeName="opacity" values="0;0.8;0" dur="${1.5+i*0.7}s" repeatCount="indefinite"/></polyline>`;
+                }
+            }
+
+            // ===== 飘落花瓣 =====
+            let petals = '';
+            if (level >= 22) {
+                const petalColors = level >= 38 ? ['#fbbf24', '#fcd34d'] : ['#c084fc', '#ddd6fe'];
+                for (let i = 0; i < 5; i++) {
+                    const pex = 30 + (i * 31) % 140;
+                    const pey = 20 + (i * 19) % 80;
+                    petals += `<ellipse cx="${pex}" cy="${pey}" rx="2.5" ry="1.5" fill="${petalColors[i % petalColors.length]}" opacity="0.5"><animate attributeName="cy" values="${pey};${pey+40}" dur="${3+i*0.8}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="${3+i*0.8}s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="rotate" from="0 ${pex} ${pey}" to="360 ${pex} ${pey+40}" dur="${3+i*0.8}s" repeatCount="indefinite"/></ellipse>`;
+                }
+            }
+
+            // ===== 仙气飘带 =====
+            let ribbons = '';
+            if (level >= 25) {
+                for (let i = 0; i < 2; i++) {
+                    const rx = i === 0 ? 35 : 165;
+                    const ry = 175 - stemH * 0.6;
+                    ribbons += `<path d="M${rx},${ry} Q${rx + (i===0?-15:15)},${ry-20} ${rx},${ry-40} Q${rx + (i===0?10:-10)},${ry-55} ${rx},${ry-70}" fill="none" stroke="${i===0?'#22d3ee':'#c084fc'}" stroke-width="1.5" opacity="0.35"><animate attributeName="d" values="M${rx},${ry} Q${rx + (i===0?-15:15)},${ry-20} ${rx},${ry-40} Q${rx + (i===0?10:-10)},${ry-55} ${rx},${ry-70};M${rx},${ry} Q${rx + (i===0?-10:10)},${ry-22} ${rx},${ry-38} Q${rx + (i===0?15:-15)},${ry-53} ${rx},${ry-68};M${rx},${ry} Q${rx + (i===0?-15:15)},${ry-20} ${rx},${ry-40} Q${rx + (i===0?10:-10)},${ry-55} ${rx},${ry-70}" dur="${3+i}s" repeatCount="indefinite"/></path>`;
+                }
+            }
+
+            // ===== 顶部帝冠 =====
+            let crown = '';
+            if (level >= 50) {
+                const cy = 175 - stemH - 18;
+                crown += `<polygon points="85,${cy} 92,${cy-14} 98,${cy-4} 104,${cy-16} 110,${cy-4} 116,${cy-14} 115,${cy}" fill="#fbbf24" opacity="0.9"/>`;
+                crown += `<polygon points="90,${cy} 96,${cy-10} 100,${cy-3} 104,${cy-10} 110,${cy}" fill="#fef08a" opacity="0.8"/>`;
+                crown += `<circle cx="92" cy="${cy-10}" r="1.5" fill="#fff"/>`;
+                crown += `<circle cx="104" cy="${cy-12}" r="1.5" fill="#fff"/>`;
+                crown += `<circle cx="112" cy="${cy-9}" r="1.5" fill="#fff"/>`;
+            }
+
+            return `<svg viewBox="0 0 200 220" width="${170 * scale}" height="${187 * scale}">
+                <defs>
+                    <linearGradient id="trunkGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="${level >= 33 ? '#fbbf24' : '#22d3ee'}"/>
+                        <stop offset="40%" stop-color="${level >= 23 ? '#a78bfa' : '#06b6d4'}"/>
+                        <stop offset="100%" stop-color="${level >= 38 ? '#d97706' : '#0891b2'}"/>
+                    </linearGradient>
+                    <radialGradient id="fruitGrad" cx="30%" cy="30%">
+                        <stop offset="0%" stop-color="#fefce8"/>
+                        <stop offset="40%" stop-color="#fbbf24"/>
+                        <stop offset="100%" stop-color="#f59e0b"/>
+                    </radialGradient>
+                    <radialGradient id="topGlow" cx="50%" cy="50%">
+                        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"/>
+                        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="glowBase" cx="50%" cy="50%">
+                        <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.9"/>
+                        <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="haloGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fbbf24"/>
+                        <stop offset="33%" stop-color="#c084fc"/>
+                        <stop offset="66%" stop-color="#22d3ee"/>
+                        <stop offset="100%" stop-color="#fbbf24"/>
+                    </linearGradient>
+                    <linearGradient id="cloudGrad1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.6"/>
+                        <stop offset="100%" stop-color="#6366f1" stop-opacity="0.2"/>
+                    </linearGradient>
+                    <linearGradient id="cloudGrad2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#c084fc" stop-opacity="0.7"/>
+                        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.3"/>
+                    </linearGradient>
+                    <linearGradient id="cloudGrad3" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.2"/>
+                    </linearGradient>
+                </defs>
+                ${stars}
+                ${cloud}
+                ${ribbons}
+                ${halo}
+                ${dragon}
+                ${lightning}
+                ${petals}
+                ${trunk}
+                ${leaves}
+                ${fruits}
+                ${flowers}
+                ${crown}
+                ${particles}
+            </svg>`;
         }
 
         function applyDebuffsAndBuffs() {
@@ -1170,9 +1957,10 @@
 
                     return `
                         <div class="habit-item ${isDone ? 'completed' : ''}">
-                            <div class="habit-info">
+                            <button class="delete-btn" onclick="openDeleteModal('habit', ${i}, '${h.name.replace(/'/g, "\\'")}')" title="删除">🗑️</button>
+                            <div class="habit-info" style="padding-right:28px;">
                                 <div class="habit-name">${h.name}</div>
-                                <div class="habit-streak">🔥 连续 ${h.streak || 0} 天 | 本月 ${monthCount} 天</div>
+                                <div class="habit-streak">🔥 连续 ${h.streak || 0} 天 | 本月 ${monthCount} 天 | 🪙 ${h.points || 10} 积分</div>
                                 <div class="week-dots-row">${weekLabels}</div>
                                 <div class="week-dots-row">${weekIcons}</div>
                             </div>
@@ -1198,9 +1986,10 @@
                     const statNames = { focus: '专注力', brain: '脑力', hormone: '激素恢复', energy: '精力' };
                     return `
                         <div class="goal-item ${isDone ? 'completed' : ''}">
-                            <div class="goal-info">
+                            <button class="delete-btn" onclick="openDeleteModal('goal', ${i}, '${g.name.replace(/'/g, "\\'")}')" title="删除">🗑️</button>
+                            <div class="goal-info" style="padding-right:28px;">
                                 <div class="goal-name">${g.name}</div>
-                                <div class="goal-buff">+${g.buff} ${statNames[g.stat]}</div>
+                                <div class="goal-buff">+${g.buff} ${statNames[g.stat]} | 🪙 ${g.points || 5} 积分</div>
                             </div>
                             <button class="btn ${isDone ? 'btn-small' : 'btn-success'}"
                                 ${isDone ? 'disabled' : ''} onclick="completeGoal(${i})">
@@ -1240,8 +2029,9 @@
         function addHabit() {
             const input = document.getElementById('habitInput');
             const name = input.value.trim();
+            const points = parseInt(document.getElementById('habitPointsInput').value) || 10;
             if (!name) return alert('请输入习惯名称');
-            data.habits.push({ name, streak: 0, lastCheckin: null, history: {} });
+            data.habits.push({ name, streak: 0, lastCheckin: null, history: {}, points });
             input.value = '';
             saveData();
             renderAll();
@@ -1263,10 +2053,14 @@
             }
             h.lastCheckin = today;
 
-            // XP 计算
+            // 积分计算
             const streakBonus = Math.min(h.streak, 7);
-            const xpGain = 10 + streakBonus * 2;
-            addXP(xpGain);
+            const basePoints = h.points || 10;
+            const pointGain = basePoints + streakBonus * 2;
+            addPoints(pointGain);
+
+            // XP = 积分
+            addXP(pointGain);
 
             // 记录历史
             data.checkinHistory[today] = (data.checkinHistory[today] || 0) + 1;
@@ -1279,7 +2073,7 @@
 
             // 激励
             const quote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
-            showMotivation('🔥 打卡成功！', `+${xpGain} XP | ${quote}`);
+            showMotivation('🔥 打卡成功！', `+${pointGain} XP/积分 | ${quote}`);
 
             // 检查奖励
             checkRewardUnlock();
@@ -1301,13 +2095,132 @@
             const today = getTodayStr();
             data.xpHistory[today] = (data.xpHistory[today] || 0) + amount;
 
-            const nextLevelXP = getXpForLevel(data.level + 1);
-            if (data.xp >= nextLevelXP) {
+            let leveledUp = false;
+            const oldLevel = data.level;
+            while (data.level < 50 && data.xp >= getXpForLevel(data.level + 1)) {
                 data.level++;
+                leveledUp = true;
+            }
+            if (leveledUp) {
                 setTimeout(() => {
-                    showMotivation('👑 升级了！', `恭喜达到等级 ${data.level}！你的身体指标全面提升！`, true);
+                    const levelDiff = data.level - oldLevel;
+                    const msg = levelDiff > 1 ? `连升 ${levelDiff} 级！` : '升级了！';
+                    showMotivation('👑 ' + msg, `恭喜达到等级 ${data.level}！你的身体指标全面提升！`, true);
                 }, 3000);
             }
+        }
+
+        function addPoints(amount) {
+            data.points += amount;
+            const today = getTodayStr();
+            data.pointHistory.push({
+                date: today,
+                time: Date.now(),
+                amount: amount,
+                type: 'earn',
+                note: ''
+            });
+        }
+
+        // ========== 删除确认弹窗 ==========
+        let deleteTarget = { type: null, index: null };
+
+        function openDeleteModal(type, index, name) {
+            deleteTarget = { type, index };
+            const typeMap = { habit: '习惯', goal: '目标', reward: '兑换奖励' };
+            document.getElementById('deleteModalText').textContent = `你确定要删除「${name}」这个${typeMap[type]}吗？此操作不可撤销。`;
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteTarget = { type: null, index: null };
+        }
+
+        function confirmDelete() {
+            const input = document.getElementById('deleteConfirmInput').value.trim();
+            if (input !== '我确定要删除该项目') {
+                alert('请输入正确的确认文字：我确定要删除该项目');
+                return;
+            }
+            const { type, index } = deleteTarget;
+            if (type === 'habit') {
+                data.habits.splice(index, 1);
+            } else if (type === 'goal') {
+                data.goals.splice(index, 1);
+            } else if (type === 'reward') {
+                data.pointRewards.splice(index, 1);
+            }
+            saveData();
+            renderAll();
+            closeDeleteModal();
+        }
+
+        // ========== 积分兑换操作 ==========
+        function renderPointRewards() {
+            const list = document.getElementById('pointRewardList');
+            const badge = document.getElementById('pointTotalBadge');
+            if (badge) badge.textContent = data.points;
+
+            if (data.pointRewards.length === 0) {
+                list.innerHTML = '<div class="empty-state">还没有兑换项目，添加一个来激励自己吧！</div>';
+                return;
+            }
+
+            list.innerHTML = data.pointRewards.map((r, i) => {
+                const canAfford = data.points >= r.cost;
+                const redeemedCount = r.redeemedCount || 0;
+                return `
+                    <div class="point-reward-item">
+                        <button class="delete-btn" onclick="openDeleteModal('reward', ${i}, '${r.name.replace(/'/g, "\\'")}')" title="删除">🗑️</button>
+                        <div class="point-reward-info" style="padding-right:28px;">
+                            <div class="point-reward-name">${r.name}</div>
+                            <div style="color:#9ca3af;font-size:0.9em;">
+                                需要 <b style="color:#f59e0b;">${r.cost}</b> 积分
+                                ${redeemedCount > 0 ? `| 已兑换 <b style="color:#10b981;">${redeemedCount}</b> 次` : ''}
+                            </div>
+                        </div>
+                        <button class="btn ${canAfford ? 'btn-primary' : 'btn-small'}"
+                            ${canAfford ? '' : 'disabled'} onclick="redeemReward(${i})"
+                            style="${canAfford ? 'background:linear-gradient(135deg, #f59e0b, #d97706);border:none;' : ''}">
+                            ${canAfford ? '🪙 兑换' : '积分不足'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addPointReward() {
+            const name = document.getElementById('rewardNameInput').value.trim();
+            const cost = parseInt(document.getElementById('rewardCostInput').value) || 0;
+            if (!name) return alert('请输入奖励名称');
+            if (cost <= 0) return alert('所需积分必须大于 0');
+            data.pointRewards.push({ name, cost, redeemedCount: 0 });
+            document.getElementById('rewardNameInput').value = '';
+            document.getElementById('rewardCostInput').value = '50';
+            saveData();
+            renderAll();
+        }
+
+        function redeemReward(index) {
+            const r = data.pointRewards[index];
+            if (!r) return;
+            if (data.points < r.cost) return alert('积分不足！');
+
+            data.points -= r.cost;
+            r.redeemedCount = (r.redeemedCount || 0) + 1;
+            data.pointHistory.push({
+                date: getTodayStr(),
+                time: Date.now(),
+                amount: -r.cost,
+                type: 'redeem',
+                note: r.name
+            });
+
+            saveData();
+            renderAll();
+            showMotivation('🎁 兑换成功！', `你消耗了 ${r.cost} 积分兑换了「${r.name}」，已兑换 ${r.redeemedCount} 次`);
         }
 
         // ========== 目标操作 ==========
@@ -1315,8 +2228,9 @@
             const name = document.getElementById('goalNameInput').value.trim();
             const stat = document.getElementById('goalStatInput').value;
             const buff = parseInt(document.getElementById('goalBuffInput').value) || 1;
+            const points = parseInt(document.getElementById('goalPointsInput').value) || 5;
             if (!name) return alert('请输入目标名称');
-            data.goals.push({ name, stat, buff, completedToday: null });
+            data.goals.push({ name, stat, buff, completedToday: null, points });
             document.getElementById('goalNameInput').value = '';
             saveData();
             renderAll();
@@ -1328,14 +2242,16 @@
             g.completedToday = today;
 
             data.stats[g.stat] += parseInt(g.buff);
-            addXP(5);
+            const goalPoints = g.points || 5;
+            addXP(goalPoints);
+            addPoints(goalPoints);
             data.checkinHistory[today] = (data.checkinHistory[today] || 0) + 1;
 
             saveData();
             renderAll();
 
             const statNames = { focus: '专注力', brain: '脑力', hormone: '激素恢复', energy: '精力' };
-            showMotivation('⬆️ Buff 获取！', `${g.name} 完成！${statNames[g.stat]} +${g.buff}`);
+            showMotivation('⬆️ Buff 获取！', `${g.name} 完成！${statNames[g.stat]} +${g.buff} | +${goalPoints} XP/积分`);
             checkRewardUnlock();
         }
 
@@ -1562,7 +2478,7 @@
                 lines.push(`<b style="color:#e74c3c;">⚠️ 警告</b>: 当前通过 file:// 协议打开，IndexedDB 会被 Chrome 禁用，无法存储音频！请通过 HTTP 服务器访问。`);
             }
 
-            resultEl.innerHTML = lines.map(l => `<div style="margin-bottom:6px;padding:6px;background:rgba(255,255,255,0.05);border-radius:6px;">${l}</div>`).join('');
+            resultEl.innerHTML = lines.map(l => `<div style="margin-bottom:6px;padding:6px;background:#f3f4f6;border-radius:6px;">${l}</div>`).join('');
         }
 
         function importFromText() {
@@ -1636,6 +2552,9 @@
                 if (!data.motivationVideos) data.motivationVideos = [];
                 if (!data.rewardsUnlocked) data.rewardsUnlocked = [];
                 if (!data.localAudios) data.localAudios = [];
+                if (typeof data.points !== 'number') data.points = 0;
+                if (!data.pointRewards) data.pointRewards = [];
+                if (!data.pointHistory) data.pointHistory = [];
                 // 兼容旧习惯数据：补 history
                 (data.habits || []).forEach(h => {
                     if (!h.history) {
@@ -2284,10 +3203,10 @@
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#eee' } } },
+                plugins: { legend: { labels: { color: '#374151' } } },
                 scales: {
-                    x: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                    y: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    x: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.06)' } },
+                    y: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.06)' } }
                 }
             };
 
@@ -2344,12 +3263,12 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#eee' } } },
+                    plugins: { legend: { labels: { color: '#374151' } } },
                     scales: {
                         r: {
-                            ticks: { color: '#aaa', backdropColor: 'transparent' },
-                            grid: { color: 'rgba(255,255,255,0.2)' },
-                            pointLabels: { color: '#eee', font: { size: 12 } },
+                            ticks: { color: '#6b7280', backdropColor: 'transparent' },
+                            grid: { color: 'rgba(0,0,0,0.08)' },
+                            pointLabels: { color: '#374151', font: { size: 12 } },
                             suggestedMin: 0,
                             suggestedMax: 100
                         }
